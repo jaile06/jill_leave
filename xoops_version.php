@@ -26,7 +26,7 @@ $modversion['min_xoops']           = '2.5';
 
 //---paypal資訊---//
 $modversion['paypal'] = [
-    'business' => 'tad0616@gmail.com',
+    'business' => 'tnjaile@gmail.com',
     'item_name' => 'Donation : ' . _MI_JILLLEAVE_AUTHOR,
     'amount' => 0,
     'currency_code' => 'USD',
