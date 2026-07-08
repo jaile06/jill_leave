@@ -16,10 +16,10 @@ $modversion['dirname']     = basename(__DIR__);
 
 //---模組狀態資訊---//
 $modversion['release_date']        = '2026-07-14';
-$modversion['module_website_url']  = 'https://github.com/tnjaile';
+$modversion['module_website_url']  = 'https://github.com/jaile06';
 $modversion['module_website_name'] = _MI_JILLLEAVE_AUTHOR_WEB;
 $modversion['module_status']       = 'release';
-$modversion['author_website_url']  = 'https://github.com/tnjaile';
+$modversion['author_website_url']  = 'https://github.com/jaile06';
 $modversion['author_website_name'] = _MI_JILLLEAVE_AUTHOR_WEB;
 $modversion['min_php']             = '8.0';
 $modversion['min_xoops']           = '2.5';
