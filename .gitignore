@@ -1,0 +1,30 @@
+# IDE / Editors
+.vscode/
+.idea/
+.claude/
+.gemini/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs and databases
+*.log
+*.sqlite
+
+# XOOPS specifics
+uploads/
+templates_c/
+cache/
