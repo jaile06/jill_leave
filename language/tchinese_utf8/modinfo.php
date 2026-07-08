@@ -22,6 +22,6 @@ define('_MI_JILLLEAVE_GRADE_DESC' , '年級可設1~12');
 define('_MI_JILLLEAVE_CLASS_ROOM' , '設定全校最多班級');
 define('_MI_JILLLEAVE_CLASS_ROOM_DESC' , '如：全校最多班級數是六年級共25班，則填25');
 define('_MI_JILLLEAVE_CLASS_PERIOD' , '節次');
-define('_MI_JILLLEAVE_CLASS_PERIOD_DESC' , '早自修,第1節,第2節,第3節...用,隔開');
+define('_MI_JILLLEAVE_CLASS_PERIOD_DESC' , '早自修,第1節,第2節,第3節...用「,」逗號隔開');
 define('_MI_JILLLEAVE_CLASS_PERIOD_DEFAULT' , '早自修,第1節,第2節,第3節,第4節,第5節,第6節,第7節');
 define('_MI_JILLLEAVE_CONFIG' , '系統參數');
