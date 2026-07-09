@@ -1,6 +1,6 @@
 <div class="container py-1">
 <!--月份篩選與匯出-->
-<form action="<{$smarty.server.PHP_SELF}>" method="get" class="row g-2 align-items-center mb-3">
+<form action="<{$smarty.server.PHP_SELF|escape}>" method="get" class="row g-2 align-items-center mb-3">
     <div class="col-auto">
         <label for="month" class="col-form-label"><{$smarty.const._MD_JILLLEAVE_MONTH}></label>
     </div>
@@ -11,7 +11,7 @@
         <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> <{$smarty.const._MD_JILLLEAVE_FILTER}></button>
     </div>
     <div class="col-auto">
-        <a href="<{$smarty.server.PHP_SELF}>?op=export_excel&month=<{$month}>" class="btn btn-success">
+        <a href="<{$smarty.server.PHP_SELF|escape}>?op=export_excel&month=<{$month}>" class="btn btn-success">
             <i class="fa fa-file-excel"></i> <{$smarty.const._MD_JILLLEAVE_EXPORT_EXCEL}>
         </a>
     </div>
@@ -22,15 +22,15 @@
     <table data-toggle="table" data-search="true" data-mobile-responsive="true" class="table table-sm table-striped table-hover">
         <thead>
             <tr>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CLASS_CLASS_PERIOD}> / <{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}> / <{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></th>
-                <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_STATUS}></th>
-                <th><{$smarty.const._TAD_FUNCTION}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CLASS_CLASS_PERIOD}> / <{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}> / <{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></th>
+                <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_STATUS}></th>
+                <th scope="col"><{$smarty.const._TAD_FUNCTION}></th>
             </tr>
         </thead>
         <tbody>
@@ -51,11 +51,11 @@
                     <td class="nowrap c"><{$data.type_text}></td>
                     <td class="nowrap c">
                         <{if $data.status == 1}>
-                            <span class="badge bg-success update-status" data-sn="<{$data.sn}>" data-status="1" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                            <button type="button" class="badge border-0 bg-success update-status" data-sn="<{$data.sn}>" data-status="1" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                         <{elseif $data.status == 2}>
-                            <span class="badge bg-danger update-status" data-sn="<{$data.sn}>" data-status="2" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                            <button type="button" class="badge border-0 bg-danger update-status" data-sn="<{$data.sn}>" data-status="2" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                         <{else}>
-                            <span class="badge bg-secondary update-status" data-sn="<{$data.sn}>" data-status="0" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                            <button type="button" class="badge border-0 bg-secondary update-status" data-sn="<{$data.sn}>" data-status="0" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                         <{/if}>
                     </td>
                     <td class="nowrap">

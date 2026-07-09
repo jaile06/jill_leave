@@ -6,23 +6,23 @@
         <thead>
             <tr>
             <!--請假者姓名-->
-            <th data-field="leavers" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></th>
+            <th scope="col" data-field="leavers" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></th>
             <!--假別-->
-            <th data-field="cate_sn" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE}></th>
+            <th scope="col" data-field="cate_sn" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE}></th>
             <!--是否導師-->
-            <th data-field="is_advisor" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_IS_ADVISOR}></th>
+            <th scope="col" data-field="is_advisor" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_IS_ADVISOR}></th>
             <!--導師班級-->
-            <th data-field="grade_class" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
+            <th scope="col" data-field="grade_class" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
             <!--起始日期-->
-            <th data-field="start_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_START_DATE}></th>
+            <th scope="col" data-field="start_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_START_DATE}></th>
             <!--結束日期-->
-            <th data-field="end_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_END_DATE}></th>
+            <th scope="col" data-field="end_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_END_DATE}></th>
             <!--審核狀態-->
-            <th data-field="status" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_STATUS}></th>
+            <th scope="col" data-field="status" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_STATUS}></th>
             <!--申請時間-->
-            <th data-field="create_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CREATE_DATE}></th>
+            <th scope="col" data-field="create_date" data-sortable="true" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CREATE_DATE}></th>
                 <{if $smarty.session.now_user|default:false}>
-                    <th><{$smarty.const._TAD_FUNCTION}></th>
+                    <th scope="col"><{$smarty.const._TAD_FUNCTION}></th>
                 <{/if}>
             </tr>
         </thead>
@@ -51,11 +51,11 @@
             <td class="text-center">
                 <{if $smarty.session.jill_leave_adm|default:false}>
                     <{if $data.status == 1}>
-                        <span class="badge bg-success update-status" data-sn="<{$data.sn}>" data-status="1" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                        <button type="button" class="badge border-0 bg-success update-status" data-sn="<{$data.sn}>" data-status="1" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                     <{elseif $data.status == 2}>
-                        <span class="badge bg-danger update-status" data-sn="<{$data.sn}>" data-status="2" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                        <button type="button" class="badge border-0 bg-danger update-status" data-sn="<{$data.sn}>" data-status="2" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                     <{else}>
-                        <span class="badge bg-secondary update-status" data-sn="<{$data.sn}>" data-status="0" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></span>
+                        <button type="button" class="badge border-0 bg-secondary update-status" data-sn="<{$data.sn}>" data-status="0" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                     <{/if}>
                 <{else}>
                     <{if $data.status == 1}>
@@ -74,9 +74,9 @@
                 <{if $smarty.session.now_user|default:false}>
                     <td>
                         <{if $smarty.session.jill_leave_adm|default:false or $data.uid == $smarty.session.now_user.uid|default:0}>
-                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
-                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
-                            <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" title="匯出 PDF"><i class="fa fa-file-pdf"></i></a>
+                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
+                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                            <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" aria-label="匯出 PDF" title="匯出 PDF"><i class="fa fa-file-pdf"></i></a>
                         <{/if}>
                     </td>
                 <{/if}>

@@ -20,11 +20,11 @@
         <thead>
             <tr>
             <!--假別名稱-->
-            <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></th>
+            <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></th>
             <!--啟用狀態-->
-            <th class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}></th>
+            <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}></th>
                 <{if $smarty.session.jill_leave_adm|default:false}>
-                    <th><{$smarty.const._TAD_FUNCTION}></th>
+                    <th scope="col"><{$smarty.const._TAD_FUNCTION}></th>
                 <{/if}>
             </tr>
         </thead>
@@ -39,16 +39,16 @@
                 <{if $smarty.session.jill_leave_adm|default:false}>
                     <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=update_enable&cate_sn=<{$data.cate_sn}>" title="點擊切換啟用狀態">
                         <{if $data.enable == 1}>
-                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="<{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>">
+                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="已啟用">
                         <{else}>
-                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="<{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>">
+                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="已停用">
                         <{/if}>
                     </a>
                 <{else}>
                     <{if $data.enable == 1}>
-                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="<{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>">
+                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="已啟用">
                     <{else}>
-                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="<{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>">
+                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="已停用">
                     <{/if}>
                 <{/if}>
             </td>

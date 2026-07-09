@@ -142,7 +142,8 @@ class Tools
     {
         $id   = (int) $id;
         $file = str_replace('\\', '/', $file);
-        if ($_SESSION['jill_leave_adm'] || ($other != '' && $_SESSION[$other]) || strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
+        //注意：不可用 PHP_SELF 判斷後台（可被 PATH_INFO 偽造），後台已於 admin/main.php 設定 session
+        if (!empty($_SESSION['jill_leave_adm']) || ($other != '' && !empty($_SESSION[$other]))) {
             if (!empty($id) && $_SESSION[$other]) {
                 if (in_array($id, $_SESSION[$other]) || $id == $_SESSION[$other]) {
                     return true;

@@ -117,9 +117,7 @@ class Jill_leave_cate
         }
 
         foreach ($all as $key => $value) {
-            $value = Tools::filter($key, $value, 'read', self::$filter_arr);
-            $all[$key] = $value;
-            $$key = $value;
+            $all[$key] = Tools::filter($key, $value, 'read', self::$filter_arr);
         }
 
         
@@ -193,9 +191,7 @@ class Jill_leave_cate
         }
 
         foreach ($jill_leave_cate as $key => $value) {
-            $value = Tools::filter($key, $value, 'edit', self::$filter_arr);
-            $$key = isset($jill_leave_cate[$key]) ? $jill_leave_cate[$key] : $def[$key];
-            $xoopsTpl->assign($key, $value);
+            $xoopsTpl->assign($key, Tools::filter($key, $value, 'edit', self::$filter_arr));
         }
 
         $op = (!empty($cate_sn)) ? "jill_leave_cate_update" : "jill_leave_cate_store";
@@ -224,11 +220,10 @@ class Jill_leave_cate
             $data_arr = $_POST;
         }
 
-        foreach ($data_arr as $key => $value) {
-            $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-        }
-
-        
+        //僅取用已知欄位，禁止 $$key 展開 POST（防止覆寫區域變數注入 SQL）
+        $cate_title = Tools::filter('cate_title', $data_arr['cate_title'] ?? '', 'write', self::$filter_arr);
+        $cate_sort = Tools::filter('cate_sort', $data_arr['cate_sort'] ?? 0, 'write', self::$filter_arr);
+        $enable = Tools::filter('enable', $data_arr['enable'] ?? 0, 'write', self::$filter_arr);
 
         $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_cate") . "` (
             `cate_title`, 
@@ -270,12 +265,12 @@ class Jill_leave_cate
             //XOOPS表單安全檢查
             Utility::xoops_security_check(__FILE__, __LINE__);
 
-            foreach ($_POST as $key => $value) {
-                $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-            }
-            
+            //僅取用已知欄位，禁止 $$key 展開 POST（防止覆寫 $and 注入 WHERE）
+            $cate_title = Tools::filter('cate_title', $_POST['cate_title'] ?? '', 'write', self::$filter_arr);
+            $cate_sort = Tools::filter('cate_sort', $_POST['cate_sort'] ?? 0, 'write', self::$filter_arr);
+            $enable = Tools::filter('enable', $_POST['enable'] ?? 0, 'write', self::$filter_arr);
 
-            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_cate") . "` SET 
+            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_cate") . "` SET
             `cate_title` = '{$cate_title}', 
             `cate_sort` = '{$cate_sort}', 
             `enable` = '{$enable}'

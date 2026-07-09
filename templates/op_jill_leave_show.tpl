@@ -1,6 +1,6 @@
 <div class="container py-1">
 <h1 class="my text-center">
-    <a href="<{$smarty.server.PHP_SELF}>" class="text-black-50" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_BACK_PAGE}>">
+    <a href="<{$smarty.server.PHP_SELF|escape}>" class="text-black-50" aria-label="<{$smarty.const._TAD_BACK_PAGE}>" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_BACK_PAGE}>">
         <i class="fa-solid fa-turn-up fa-rotate-270"></i>
     </a>
     <{$leavers}>
@@ -8,7 +8,7 @@
 
 <div class="text-center">
     <{if $can_manage|default:false}>
-        <a href="javascript:jill_leave_destroy_func(<{$sn}>);" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-times" aria-hidden="true"></i></a>
+        <a href="javascript:jill_leave_destroy_func(<{$sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-times" aria-hidden="true"></i></a>
         <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$sn}>" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil" aria-hidden="true"></i> <{$smarty.const._TAD_EDIT}></a>
         <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_ADD}>"><i class="fa fa-plus" aria-hidden="true"></i> <{$smarty.const._TAD_ADD}></a>
         <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$sn}>" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="匯出 PDF"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
@@ -63,13 +63,13 @@
         <table class="table table-sm table-striped table-hover">
             <thead>
                 <tr>
-                    <th><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_CLASS_CLASS_PERIOD}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></th>
-                    <th><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_CLASS_CLASS_PERIOD}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></th>
+                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></th>
                 </tr>
             </thead>
             <tbody>

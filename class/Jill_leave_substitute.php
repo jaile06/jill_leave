@@ -4,10 +4,7 @@ namespace XoopsModules\Jill_leave;
 use XoopsModules\Tadtools\SweetAlert;
 use XoopsModules\Tadtools\Utility;
 use XoopsModules\Tadtools\BootstrapTable;
-use XoopsModules\Tadtools\FancyBox;
 use XoopsModules\Jill_leave\Tools;
-use XoopsModules\Tadtools\TadUpFiles;
-use XoopsModules\Tadtools\FormValidator;
 use XoopsModules\Tadtools\My97DatePicker;
 
 
@@ -23,33 +20,6 @@ class Jill_leave_substitute
         'pass' => ['files'], //不予過濾的欄位
         'explode' => [],   //用分號隔開的欄位
     ];
-
-    //列出所有 jill_leave_substitute 資料 Jill_leave_substitute::index()
-    public static function index($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $amount = '')
-    {
-        global $xoopsTpl, $xoTheme;
-
-        if ($amount) {
-            list($all_jill_leave_substitute, $total, $bar) = self::get_all($where_arr, $other_arr, $view_cols, $order_arr, null, null, 'read', $amount);
-            $xoopsTpl->assign('bar', $bar);
-            $xoopsTpl->assign('total', $total);
-        } else {
-            $all_jill_leave_substitute = self::get_all($where_arr, $other_arr, $view_cols, $order_arr);
-        }
-
-        $xoopsTpl->assign('all_jill_leave_substitute', $all_jill_leave_substitute);
-        Utility::test($all_jill_leave_substitute, 'all_jill_leave_substitute');
-
-        //刪除確認的JS
-        $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_substitute_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_substitute_destroy&substitute_sn=", "substitute_sn");
-        
-        BootstrapTable::render();
-
-        $fancybox = new FancyBox('.fancybox_jill_leave_substitute_substitute_sn');
-        $fancybox->render();
-    }
-
 
     //取得 jill_leave_substitute 所有資料陣列 Jill_leave_substitute::get_all()
     public static function get_all($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $key_name = false, $get_value = '', $filter = 'read', $amount = '')
@@ -101,214 +71,18 @@ class Jill_leave_substitute
     }
 
 
-    //以流水號秀出某筆 jill_leave_substitute 資料內容 Jill_leave_substitute::show()
-    public static function show($where_arr = [], $other_arr = [], $mode = '')
-    {
-        global $xoopsTpl;
-
-        if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
-        }
-
-        $all = self::get($where_arr, $other_arr);
-        if (empty($all)) {
-            return false;
-        }
-
-        foreach ($all as $key => $value) {
-            $value = Tools::filter($key, $value, 'read', self::$filter_arr);
-            $all[$key] = $value;
-            $$key = $value;
-        }
-
-        
-
-        $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_substitute_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_substitute_destroy&substitute_sn=", "substitute_sn");
-
-        if ($mode == "return") {
-            return $all;
-        } elseif ($mode == "assign_all") {
-            $xoopsTpl->assign('jill_leave_substitute', $all);
-        } else {
-            foreach ($all as $key => $value) {
-                $xoopsTpl->assign($key, $value);
-            }
-        }
-    }
-
-
-    //以流水號取得某筆 jill_leave_substitute 資料 Jill_leave_substitute::get()
-    public static function get($where_arr = [], $other_arr = [], $filter = 'read', $only_key = '')
-    {
-        global $xoopsDB;
-
-        if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
-        }
-
-        $and_sql = Tools::get_and_where($where_arr);
-
-        $sql = "SELECT * FROM `" . $xoopsDB->prefix("jill_leave_substitute") . "` WHERE 1 $and_sql";
-        $result = $xoopsDB->query($sql) or Utility::web_error($sql);
-        $data = $xoopsDB->fetchArray($result);
-        $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
-        
-
-        // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-        //     $data['xxx'] = ooo::get_all();
-        // }
-
-        foreach (self::$filter_arr['explode'] as $item) {
-            $data[$item . '_arr'] = explode(';', $data[$item]);
-        }
-
-        if ($only_key) {
-            return $data[$only_key];
-        } else {
-            return $data;
-        }
-    }
-
-
-    //jill_leave_substitute 編輯表單
-    public static function create($substitute_sn = '' )
-    {
-        global $xoopsTpl, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        //抓取預設值
-        $jill_leave_substitute = (!empty($substitute_sn)) ? self::get(['substitute_sn' =>$substitute_sn]) : [];
-
-        //預設值設定
-        
-        $def['substitute_sn'] = $substitute_sn;
-        $def['sn'] = 0;
-        $def['substitute_date'] = date("Y-m-d");
-        $def['pay'] = 'self';
-        $def['type'] = 'daily';
-
-        if (empty($jill_leave_substitute)) {
-            $jill_leave_substitute = $def;
-        }
-
-        foreach ($jill_leave_substitute as $key => $value) {
-            $value = Tools::filter($key, $value, 'edit', self::$filter_arr);
-            $$key = isset($jill_leave_substitute[$key]) ? $jill_leave_substitute[$key] : $def[$key];
-            $xoopsTpl->assign($key, $value);
-        }
-
-        $op = (!empty($substitute_sn)) ? "jill_leave_substitute_update" : "jill_leave_substitute_store";
-        $xoopsTpl->assign('next_op', $op);
-
-        //套用formValidator驗證機制
-        $formValidator = new FormValidator("#myForm", true);
-        $formValidator->render();
-
-        
-        My97DatePicker::render();
-    
-        //加入Token安全機制
-        Utility::token_form();
-    }
-
-
-    //新增資料到 jill_leave_substitute Jill_leave_substitute::store()
-    public static function store($data_arr = [])
-    {
-        global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        //XOOPS表單安全檢查
-        if (empty($data_arr)) {
-            Utility::xoops_security_check();
-            $data_arr = $_POST;
-        }
-
-        foreach ($data_arr as $key => $value) {
-            $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-        }
-
-        
-
-        $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_substitute") . "` (
-            `sn`, 
-            `substitute_date`, 
-            `pay`, 
-            `type`
-        ) VALUES(
-            '{$sn}', 
-            '{$substitute_date}', 
-            '{$pay}', 
-            '{$type}'
-        )";
-        $xoopsDB->queryF($sql) or Utility::web_error($sql);
-
-        //取得最後新增資料的流水編號
-        $substitute_sn = $xoopsDB->getInsertId();
-        
-        return $substitute_sn;
-    }
-
-
-    //更新 jill_leave_substitute 某一筆資料 Jill_leave_substitute::update()
-    public static function update($where_arr=[], $data_arr = [])
-    {
-        global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        $and = Tools::get_and_where($where_arr);
-
-        if (!empty($data_arr)) {
-            $col_arr = [];
-
-            foreach ($data_arr as $key => $value) {
-                $value = Tools::filter($key, $value, 'write', self::$filter_arr);
-                $col_arr[] = "`$key` = '{$value}'";
-            }
-            $update_cols = implode(', ', $col_arr);
-            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_substitute") . "` SET
-            $update_cols WHERE 1 $and";
-        } else {
-            //XOOPS表單安全檢查
-            Utility::xoops_security_check(__FILE__, __LINE__);
-
-            foreach ($_POST as $key => $value) {
-                $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-            }
-            
-
-            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_substitute") . "` SET 
-            `sn` = '{$sn}', 
-            `substitute_date` = '{$substitute_date}', 
-            `pay` = '{$pay}', 
-            `type` = '{$type}'
-            WHERE 1 $and";
-        }
-        $xoopsDB->queryF($sql) or Utility::web_error($sql);
-        
-        return $where_arr['substitute_sn'];
-    }
-
-
     //刪除 jill_leave_substitute 某筆資料資料 Jill_leave_substitute::destroy()
     public static function destroy($substitute_sn = '')
     {
         global $xoopsDB;
         Tools::chk_is_adm('', '', __FILE__, __LINE__);
 
-        if(empty($substitute_sn)) {
+        $substitute_sn = (int) $substitute_sn;
+        if (empty($substitute_sn)) {
             return;
         }
 
-        $and = '';
-        if($substitute_sn){
-        $and .= "and `substitute_sn` = '$substitute_sn'";
-    }
-    
-
-        $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave_substitute") . "`
-        WHERE 1 $and";
+        $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave_substitute") . "` WHERE `substitute_sn` = '{$substitute_sn}'";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
 
         //連帶刪除節次明細

@@ -1,15 +1,8 @@
 <?php
 namespace XoopsModules\Jill_leave;
 
-use XoopsModules\Tadtools\SweetAlert;
 use XoopsModules\Tadtools\Utility;
-use XoopsModules\Tadtools\BootstrapTable;
-use XoopsModules\Tadtools\FancyBox;
 use XoopsModules\Jill_leave\Tools;
-use XoopsModules\Tadtools\TadUpFiles;
-use XoopsModules\Tadtools\FormValidator;
-
-
 
 class Jill_leave_class
 {
@@ -65,33 +58,6 @@ class Jill_leave_class
         return $class;
     }
 
-    //列出所有 jill_leave_class 資料 Jill_leave_class::index()
-    public static function index($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $amount = '')
-    {
-        global $xoopsTpl, $xoTheme;
-
-        if ($amount) {
-            list($all_jill_leave_class, $total, $bar) = self::get_all($where_arr, $other_arr, $view_cols, $order_arr, null, null, 'read', $amount);
-            $xoopsTpl->assign('bar', $bar);
-            $xoopsTpl->assign('total', $total);
-        } else {
-            $all_jill_leave_class = self::get_all($where_arr, $other_arr, $view_cols, $order_arr);
-        }
-
-        $xoopsTpl->assign('all_jill_leave_class', $all_jill_leave_class);
-        Utility::test($all_jill_leave_class, 'all_jill_leave_class');
-
-        //刪除確認的JS
-        $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_class_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_class_destroy&class_sn=", "class_sn");
-        
-        BootstrapTable::render();
-
-        $fancybox = new FancyBox('.fancybox_jill_leave_class_class_sn');
-        $fancybox->render();
-    }
-
-
     //取得 jill_leave_class 所有資料陣列 Jill_leave_class::get_all()
     public static function get_all($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $key_name = false, $get_value = '', $filter = 'read', $amount = '')
     {
@@ -115,19 +81,14 @@ class Jill_leave_class
         $result = $xoopsDB->query($sql) or Utility::web_error($sql);
         $data_arr = [];
         $i = 0;
-        
+
         while ($data = $xoopsDB->fetchArray($result)) {
-            
+
             $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
 
             foreach (self::$filter_arr['explode'] as $item) {
                 $data[$item . '_arr'] = explode(';', $data[$item]);
             }
-
-            // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-            //     $data['xxx'] = ooo::get_all();
-            // }
-            
 
             $new_key = $key_name ? $data[$key_name] : $i;
             $data_arr[$new_key] = $get_value ? $data[$get_value] : $data;
@@ -140,220 +101,4 @@ class Jill_leave_class
             return $data_arr;
         }
     }
-
-
-    //以流水號秀出某筆 jill_leave_class 資料內容 Jill_leave_class::show()
-    public static function show($where_arr = [], $other_arr = [], $mode = '')
-    {
-        global $xoopsTpl;
-
-        if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
-        }
-
-        $all = self::get($where_arr, $other_arr);
-        if (empty($all)) {
-            return false;
-        }
-
-        foreach ($all as $key => $value) {
-            $value = Tools::filter($key, $value, 'read', self::$filter_arr);
-            $all[$key] = $value;
-            $$key = $value;
-        }
-
-        
-
-        $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_class_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_class_destroy&class_sn=", "class_sn");
-
-        if ($mode == "return") {
-            return $all;
-        } elseif ($mode == "assign_all") {
-            $xoopsTpl->assign('jill_leave_class', $all);
-        } else {
-            foreach ($all as $key => $value) {
-                $xoopsTpl->assign($key, $value);
-            }
-        }
-    }
-
-
-    //以流水號取得某筆 jill_leave_class 資料 Jill_leave_class::get()
-    public static function get($where_arr = [], $other_arr = [], $filter = 'read', $only_key = '')
-    {
-        global $xoopsDB;
-
-        if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
-        }
-
-        $and_sql = Tools::get_and_where($where_arr);
-
-        $sql = "SELECT * FROM `" . $xoopsDB->prefix("jill_leave_class") . "` WHERE 1 $and_sql";
-        $result = $xoopsDB->query($sql) or Utility::web_error($sql);
-        $data = $xoopsDB->fetchArray($result);
-        $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
-        
-
-        // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-        //     $data['xxx'] = ooo::get_all();
-        // }
-
-        foreach (self::$filter_arr['explode'] as $item) {
-            $data[$item . '_arr'] = explode(';', $data[$item]);
-        }
-
-        if ($only_key) {
-            return $data[$only_key];
-        } else {
-            return $data;
-        }
-    }
-
-
-    //jill_leave_class 編輯表單
-    public static function create($class_sn = '' )
-    {
-        global $xoopsTpl, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        //抓取預設值
-        $jill_leave_class = (!empty($class_sn)) ? self::get(['class_sn' =>$class_sn]) : [];
-
-        //預設值設定
-        
-        $def['class_sn'] = $class_sn;
-
-        if (empty($jill_leave_class)) {
-            $jill_leave_class = $def;
-        }
-
-        foreach ($jill_leave_class as $key => $value) {
-            $value = Tools::filter($key, $value, 'edit', self::$filter_arr);
-            $$key = isset($jill_leave_class[$key]) ? $jill_leave_class[$key] : $def[$key];
-            $xoopsTpl->assign($key, $value);
-        }
-
-        $op = (!empty($class_sn)) ? "jill_leave_class_update" : "jill_leave_class_store";
-        $xoopsTpl->assign('next_op', $op);
-
-        //套用formValidator驗證機制
-        $formValidator = new FormValidator("#myForm", true);
-        $formValidator->render();
-
-        
-    
-        //加入Token安全機制
-        Utility::token_form();
-    }
-
-
-    //新增資料到 jill_leave_class Jill_leave_class::store()
-    public static function store($data_arr = [])
-    {
-        global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        //XOOPS表單安全檢查
-        if (empty($data_arr)) {
-            Utility::xoops_security_check();
-            $data_arr = $_POST;
-        }
-
-        foreach ($data_arr as $key => $value) {
-            $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-        }
-
-        
-
-        $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_class") . "` (
-            `substitute_sn`, 
-            `sn`, 
-            `class_period`, 
-            `subject`, 
-            `substitute_teacher`
-        ) VALUES(
-            '{$substitute_sn}', 
-            '{$sn}', 
-            '{$class_period}', 
-            '{$subject}', 
-            '{$substitute_teacher}'
-        )";
-        $xoopsDB->queryF($sql) or Utility::web_error($sql);
-
-        //取得最後新增資料的流水編號
-        $class_sn = $xoopsDB->getInsertId();
-        
-        return $class_sn;
-    }
-
-
-    //更新 jill_leave_class 某一筆資料 Jill_leave_class::update()
-    public static function update($where_arr=[], $data_arr = [])
-    {
-        global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        $and = Tools::get_and_where($where_arr);
-
-        if (!empty($data_arr)) {
-            $col_arr = [];
-
-            foreach ($data_arr as $key => $value) {
-                $value = Tools::filter($key, $value, 'write', self::$filter_arr);
-                $col_arr[] = "`$key` = '{$value}'";
-            }
-            $update_cols = implode(', ', $col_arr);
-            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_class") . "` SET
-            $update_cols WHERE 1 $and";
-        } else {
-            //XOOPS表單安全檢查
-            Utility::xoops_security_check(__FILE__, __LINE__);
-
-            foreach ($_POST as $key => $value) {
-                $$key = Tools::filter($key, $value, 'write', self::$filter_arr);
-            }
-            
-
-            $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_class") . "` SET 
-            `substitute_sn` = '{$substitute_sn}', 
-            `sn` = '{$sn}', 
-            `class_period` = '{$class_period}', 
-            `subject` = '{$subject}', 
-            `substitute_teacher` = '{$substitute_teacher}'
-            WHERE 1 $and";
-        }
-        $xoopsDB->queryF($sql) or Utility::web_error($sql);
-        
-        return $where_arr['class_sn'];
-    }
-
-
-    //刪除 jill_leave_class 某筆資料資料 Jill_leave_class::destroy()
-    public static function destroy($class_sn = '')
-    {
-        global $xoopsDB;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        if(empty($class_sn)) {
-            return;
-        }
-
-        $and = '';
-        if($class_sn){
-        $and .= "and `class_sn` = '$class_sn'";
-    }
-    
-
-        $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave_class") . "`
-        WHERE 1 $and";
-        $xoopsDB->queryF($sql) or Utility::web_error($sql);
-        
-    }
-
-
-
-
-
 }

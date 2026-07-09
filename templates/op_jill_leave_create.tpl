@@ -1,6 +1,6 @@
 <!--請假表單：套用 formValidator 驗證機制；代課卡片由 js/leave_form.js 依起訖日期動態生成-->
 <div class="container py-1">
-<form action="<{$smarty.server.PHP_SELF}>" method="post" id="myForm">
+<form action="<{$smarty.server.PHP_SELF|escape}>" method="post" id="myForm">
     <!--請假者姓名（自動帶入登入者姓名，不可修改）-->
     <div class="form-floating mb-3">
         <input type="text" id="leavers" class="form-control" value="<{$leavers}>" placeholder="<{$smarty.const._MD_JILLLEAVE_LEAVERS}>" disabled>
@@ -175,7 +175,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
-                        <input type="text" class="form-control form-control-sm teacher-input" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" disabled>
+                        <input type="text" class="form-control form-control-sm teacher-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" disabled>
                     </div>
                 </div>
             </div>
@@ -197,14 +197,14 @@
         <!--科任逐節班級（年級下拉＋班級文字框），級任隱藏；手機佔8格-->
         <div class="col-8 col-sm-9 col-md-3 grade-class-wrap">
             <div class="input-group input-group-sm">
-                <select class="form-select gc-grade" disabled>
+                <select class="form-select gc-grade" aria-label="<{$smarty.const._MD_JILLLEAVE_GRADE_SELECT}>" disabled>
                     <option value=""><{$smarty.const._MD_JILLLEAVE_GRADE_SELECT}></option>
                     <{foreach from=$grade_options item=g}>
                         <option value="<{$g}>"><{$g}></option>
                     <{/foreach}>
                 </select>
                 <span class="input-group-text">年</span>
-                <select class="form-select gc-class" disabled>
+                <select class="form-select gc-class" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}>" disabled>
                     <option value=""><{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}></option>
                     <{section name=j start=1 loop=$class_room_max+1}>
                         <option value="<{$smarty.section.j.index}>"><{$smarty.section.j.index}></option>
@@ -215,7 +215,7 @@
         </div>
         <!--科目（手機整行）-->
         <div class="col-12 col-md-2">
-            <input type="text" class="form-control form-control-sm subject-input" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" disabled>
+            <input type="text" class="form-control form-control-sm subject-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" disabled>
         </div>
         <!--代課老師選項（手機整行）-->
         <div class="col-12 col-md-auto">
@@ -228,7 +228,7 @@
         </div>
         <!--代課老師姓名（手機整行）-->
         <div class="col-12 col-md">
-            <input type="text" class="form-control form-control-sm teacher-input" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" disabled>
+            <input type="text" class="form-control form-control-sm teacher-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" disabled>
         </div>
     </div>
 

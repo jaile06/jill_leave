@@ -1,7 +1,7 @@
 <div class="container py-1">
 
 <!--套用formValidator驗證機制-->
-<form action="<{$smarty.server.PHP_SELF}>" method="post" id="myForm" enctype="multipart/form-data">
+<form action="<{$smarty.server.PHP_SELF|escape}>" method="post" id="myForm" enctype="multipart/form-data">
     <div class="row">
 
         <!--假別名稱-->

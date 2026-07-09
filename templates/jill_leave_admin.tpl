@@ -4,7 +4,7 @@
     <{/if}>
 </div>
 
-<script language="JavaScript" type="text/javascript">
+<script type="text/javascript">
     $(document).ready(function(){
         $('[data-toggle="tooltip"]').tooltip();
         $('[data-bs-toggle="tooltip"]').tooltip();

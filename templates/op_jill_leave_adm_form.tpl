@@ -1,6 +1,6 @@
 <!--管理人員設定表單-->
 <div class="container py-1">
-<form action="<{$smarty.server.PHP_SELF}>" method="post" id="myForm">
+<form action="<{$smarty.server.PHP_SELF|escape}>" method="post" id="myForm">
     <div class="card">
         <div class="card-header">
             <i class="fa fa-user-gear"></i> <{$smarty.const._MD_JILLLEAVE_ADM}>

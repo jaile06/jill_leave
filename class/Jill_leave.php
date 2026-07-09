@@ -562,7 +562,7 @@ class Jill_leave
     {
         global $xoopsDB;
         $sn = (int) $sn;
-        $status = (int) $status;
+        $status = in_array((int) $status, [0, 1, 2], true) ? (int) $status : 0;
         $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave") . "` SET `status` = '{$status}' WHERE `sn` = '{$sn}'";
         return $xoopsDB->queryF($sql) ? true : false;
     }
