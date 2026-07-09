@@ -248,7 +248,7 @@ class Jill_leave
         // 從 grade_class 拆出年級和班級供下拉選單預選
         $grade = '';
         $classroom = '';
-        if (!empty($jill_leave['grade_class']) && preg_match('/^(\d+)年(\d+)班$/', $jill_leave['grade_class'], $m)) {
+        if (!empty($jill_leave['is_advisor']) && !empty($jill_leave['grade_class']) && preg_match('/^(\d+)年(\d+)班$/', $jill_leave['grade_class'], $m)) {
             $grade = $m[1];
             $classroom = $m[2];
         }
@@ -302,6 +302,7 @@ class Jill_leave
         $cate_sn = Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
         $is_advisor = Tools::filter('is_advisor', $_POST['is_advisor'] ?? 0, 'write', self::$filter_arr);
         $grade_class = Tools::filter('grade_class', $_POST['grade_class'] ?? '', 'write', self::$filter_arr);
+        $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
 
@@ -400,6 +401,7 @@ class Jill_leave
         $cate_sn = Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
         $is_advisor = Tools::filter('is_advisor', $_POST['is_advisor'] ?? 0, 'write', self::$filter_arr);
         $grade_class = Tools::filter('grade_class', $_POST['grade_class'] ?? '', 'write', self::$filter_arr);
+        $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
 
