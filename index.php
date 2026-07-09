@@ -92,12 +92,9 @@ if (!empty($xoopsUser) && !in_array(4, $xoopsUser->getGroups(), true)) {
                 break;
             }
 
-            //管理者可看全部，一般使用者僅列出個人請假紀錄
+            //主頁一律僅列出個人請假紀錄（管理員看全校請走「代課管理」總覽）
             $where_arr = [];
-            if (empty($_SESSION['jill_leave_adm'])) {
-                $now_uid = isset($xoopsUser) && is_object($xoopsUser) ? (int) $xoopsUser->uid() : 0;
-                $where_arr['uid'] = $now_uid;
-            }
+            $where_arr['uid'] = isset($xoopsUser) && is_object($xoopsUser) ? (int) $xoopsUser->uid() : 0;
             if (!empty($cate_sn)) {
                 $where_arr['cate_sn'] = $cate_sn;
             }
