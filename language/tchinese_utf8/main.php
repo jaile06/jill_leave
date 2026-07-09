@@ -84,8 +84,13 @@ define('_MD_JILLLEAVE_EXPORT_TITLE', '鐘點費清冊 ');
 define('_MD_JILLLEAVE_ADM_EMAIL', '管理人員 Email');
 define('_MD_JILLLEAVE_ADM_EMAIL_DESC', '多筆 Email 請以「;」分號隔開，列於此處的使用者登入後即具有本模組的管理權限（需重新登入生效）。');
 
+//狀態
+define('_MD_JILLLEAVE_ENABLED', '已啟用');
+define('_MD_JILLLEAVE_DISABLED', '已停用');
+
 //訊息
 define('_MD_JILLLEAVE_DUPLICATE_LEAVE', '您在該日期區間已有假單，無法重複請假');
+define('_MD_JILLLEAVE_TOKEN_ERROR', '安全驗證失敗，請重新整理頁面後再試');
 define('_MD_JILLLEAVE_NO_PERMISSION', '無操作權限');
 define('_MD_JILLLEAVE_NO_CONDITION', '無查詢條件');
 define('_MD_JILLLEAVE_SUBSTITUTE_SAVE_FAIL', '代課資料儲存失敗，請假資料未寫入，請重新操作');

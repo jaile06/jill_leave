@@ -17,6 +17,11 @@ Tools::chk_is_adm('', '', __FILE__, __LINE__);
 if ($op == 'update_sort') {
     global $xoopsLogger;
     $xoopsLogger->activated = false;
+    //CSRF 檢查（不清除 token，同頁可多次排序）
+    if (!$GLOBALS['xoopsSecurity']->check(false)) {
+        echo _MD_JILLLEAVE_TOKEN_ERROR;
+        exit;
+    }
     echo Jill_leave_cate::update_sort();
     exit;
 }
@@ -29,6 +34,10 @@ switch ($op) {
 
     //點擊切換狀態
     case 'update_enable':
+        //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
+        if (!$GLOBALS['xoopsSecurity']->check(false)) {
+            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+        }
         Jill_leave_cate::update_enable($cate_sn);
         header("location: {$_SERVER['PHP_SELF']}");
         exit;
@@ -59,6 +68,10 @@ switch ($op) {
 
     //刪除資料
     case 'jill_leave_cate_destroy':
+        //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
+        if (!$GLOBALS['xoopsSecurity']->check(false)) {
+            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+        }
         Jill_leave_cate::destroy($cate_sn);
         header("location: {$_SERVER['PHP_SELF']}");
         exit;

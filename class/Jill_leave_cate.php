@@ -40,9 +40,13 @@ class Jill_leave_cate
         $xoopsTpl->assign('all_jill_leave_cate', $all_jill_leave_cate);
         Utility::test($all_jill_leave_cate, 'all_jill_leave_cate');
 
+        //CSRF token（GET 刪除/切換連結與 AJAX 排序共用，不清除以供同頁多次操作）
+        $token = $GLOBALS['xoopsSecurity']->createToken();
+        $xoopsTpl->assign('csrf_token', $token);
+
         //刪除確認的JS
         $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&cate_sn=", "cate_sn");
+        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
         
         Utility::get_jquery(true);
         BootstrapTable::render();
@@ -123,7 +127,8 @@ class Jill_leave_cate
         
 
         $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&cate_sn=", "cate_sn");
+        $token = $GLOBALS['xoopsSecurity']->createToken();
+        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
 
         if ($mode == "return") {
             return $all;

@@ -138,7 +138,8 @@ $(function(){
             $.post('index.php', {
                 op: 'update_status',
                 sn: sn,
-                status: nextStatus
+                status: nextStatus,
+                XOOPS_TOKEN_REQUEST: '<{$csrf_token}>'
             }, function(res){
                 if (res.success) {
                     var $allBadges = $('.update-status[data-sn="' + sn + '"]');

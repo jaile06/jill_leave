@@ -250,4 +250,9 @@ label {
   .period-row .form-check-label {
     padding: 4px 0;
   }
-}
+}
+/* WCAG AA (1.4.3)：bg-info 底色白字對比不足，改深色文字 */
+.badge.bg-info,
+.btn-info {
+    color: #212529;
+}

@@ -5,7 +5,7 @@
             $(document).ready(function(){
                 $("#jill_leave_cate_sort").sortable({ opacity: 0.6, cursor: "move", update: function() {
                     var order = $(this).sortable("serialize");
-                    $.post("<{$xoops_url}>/modules/jill_leave/cate.php", order + "&op=update_sort", function(msg){
+                    $.post("<{$xoops_url}>/modules/jill_leave/cate.php", order + "&op=update_sort&XOOPS_TOKEN_REQUEST=<{$csrf_token}>", function(msg){
                         $("#jill_leave_cate_save_msg").html(msg);
                     });
                 }
@@ -37,18 +37,18 @@
             <!--啟用狀態-->
             <td class="text-center">
                 <{if $smarty.session.jill_leave_adm|default:false}>
-                    <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=update_enable&cate_sn=<{$data.cate_sn}>" title="點擊切換啟用狀態">
+                    <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=update_enable&XOOPS_TOKEN_REQUEST=<{$csrf_token}>&cate_sn=<{$data.cate_sn}>" title="點擊切換啟用狀態">
                         <{if $data.enable == 1}>
-                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="已啟用">
+                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="<{$smarty.const._MD_JILLLEAVE_ENABLED}>">
                         <{else}>
-                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="已停用">
+                            <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="<{$smarty.const._MD_JILLLEAVE_DISABLED}>">
                         <{/if}>
                     </a>
                 <{else}>
                     <{if $data.enable == 1}>
-                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="已啟用">
+                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="<{$smarty.const._MD_JILLLEAVE_ENABLED}>">
                     <{else}>
-                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="已停用">
+                        <img src="<{$xoops_url}>/modules/jill_leave/images/icons/off.png" alt="<{$smarty.const._MD_JILLLEAVE_DISABLED}>">
                     <{/if}>
                 <{/if}>
             </td>

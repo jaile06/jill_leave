@@ -105,7 +105,8 @@ $(function(){
             $.post('index.php', {
                 op: 'update_status',
                 sn: sn,
-                status: nextStatus
+                status: nextStatus,
+                XOOPS_TOKEN_REQUEST: '<{$csrf_token}>'
             }, function(res){
                 if (res.success) {
                     // 同步更新同一筆請假單的所有狀態顯示

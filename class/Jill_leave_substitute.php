@@ -217,9 +217,13 @@ class Jill_leave_substitute
         $xoopsTpl->assign('all_substitute', $data_arr);
         $xoopsTpl->assign('month', $month);
 
+        //CSRF token（GET 刪除連結與 AJAX 狀態切換共用，不清除以供同頁多次操作）
+        $token = $GLOBALS['xoopsSecurity']->createToken();
+        $xoopsTpl->assign('csrf_token', $token);
+
         //刪除假單（連帶代課資料）確認的JS
         $SweetAlert = new SweetAlert();
-        $SweetAlert->render('jill_leave_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_destroy&month={$month}&sn=", "sn");
+        $SweetAlert->render('jill_leave_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_destroy&month={$month}&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
 
         BootstrapTable::render();
         My97DatePicker::render();

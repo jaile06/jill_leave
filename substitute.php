@@ -32,12 +32,20 @@ switch ($op) {
 
     //刪除任意假單（連帶刪除代課與節次資料）
     case 'jill_leave_destroy':
+        //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
+        if (!$GLOBALS['xoopsSecurity']->check(false)) {
+            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+        }
         Jill_leave::destroy($sn);
         header("location: {$_SERVER['PHP_SELF']}?month=$month");
         exit;
 
     //刪除單筆代課資料（連帶節次明細）
     case 'jill_leave_substitute_destroy':
+        //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
+        if (!$GLOBALS['xoopsSecurity']->check(false)) {
+            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+        }
         Jill_leave_substitute::destroy($substitute_sn);
         header("location: {$_SERVER['PHP_SELF']}?month=$month");
         exit;

@@ -19,6 +19,11 @@ if ($op === 'update_status') {
         echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_NO_PERMISSION]);
         exit;
     }
+    //CSRF 檢查（不清除 token，同頁可多次切換）
+    if (!$GLOBALS['xoopsSecurity']->check(false)) {
+        echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_TOKEN_ERROR]);
+        exit;
+    }
     $status = Request::getInt('status');
     $success = Jill_leave::update_status($sn, $status);
     echo json_encode(['success' => $success, 'status_text' => Jill_leave::status_text($status)]);
@@ -69,6 +74,10 @@ if (!empty($xoopsUser) && !in_array(4, $xoopsUser->getGroups(), true)) {
 
         //刪除資料（連帶刪除代課與節次資料）
         case 'jill_leave_destroy':
+            //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
+            if (!$GLOBALS['xoopsSecurity']->check(false)) {
+                redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+            }
             Jill_leave::destroy($sn);
             header("location: {$_SERVER['PHP_SELF']}");
             exit;
