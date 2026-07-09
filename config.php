@@ -7,7 +7,7 @@ use XoopsModules\Tadtools\FormValidator;
 /*-----------引入檔案區--------------*/
 require_once __DIR__ . '/header.php';
 xoops_loadLanguage('modinfo', 'jill_leave');
-$GLOBALS['xoopsOption']['template_main'] = 'jill_leave_adm.tpl';
+$GLOBALS['xoopsOption']['template_main'] = 'jill_leave_wrap.tpl';
 require_once XOOPS_ROOT_PATH . '/header.php';
 
 /*-----------變數過濾----------*/
@@ -23,23 +23,10 @@ switch ($op) {
     case 'save_config':
         Utility::xoops_security_check();
 
-        //清洗管理人員 Email (用分號隔開，去除句尾的分號或逗號及空白)
-        $adm_email = trim(Request::getString('adm_email'));
-        $adm_email = preg_replace('/[;,]+$/', '', $adm_email);
-        $email_arr = array_filter(array_map('trim', explode(';', $adm_email)));
-        $adm_email = implode(';', $email_arr);
-
-        //清洗年級
-        $grade = trim(Request::getString('grade'));
-        $grade = preg_replace('/[;,]+$/', '', $grade);
-        $grade_arr = array_filter(array_map('intval', explode(',', $grade)));
-        $grade = implode(',', $grade_arr);
-
-        //清洗節次 (用逗號隔開，去除句尾的分號或逗號及空白)
-        $class_period = trim(Request::getString('class_period'));
-        $class_period = preg_replace('/[;,]+$/', '', $class_period);
-        $period_arr = array_filter(array_map('trim', explode(',', $class_period)));
-        $class_period = implode(',', $period_arr);
+        //清洗清單字串：去句尾分隔符、拆分、trim/map、濾空、重組（分號隔開 email；逗號隔開年級/節次）
+        $adm_email    = clean_list(Request::getString('adm_email'), ';');
+        $grade        = clean_list(Request::getString('grade'), ',', 'intval');
+        $class_period = clean_list(Request::getString('class_period'), ',');
 
         //全部統一走模組偏好設定
         Tools::set_module_config('adm_email', $adm_email);
@@ -64,6 +51,13 @@ switch ($op) {
 require_once __DIR__ . '/footer.php';
 
 /*-----------功能函數區----------*/
+
+//清洗以 $sep 分隔的清單字串：去句尾分隔符、拆分、$map 處理、濾空、重組
+function clean_list($value, $sep, $map = 'trim')
+{
+    $value = preg_replace('/[;,]+$/', '', trim($value));
+    return implode($sep, array_filter(array_map($map, explode($sep, $value))));
+}
 
 //模組設定表單
 function config_form()

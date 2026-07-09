@@ -18,11 +18,6 @@ switch($op){
     
 }
 
-/*-----------秀出結果區--------------*/
-$xoopsTpl->assign('now_op', $op);
-require_once __DIR__ . '/footer.php';
-
-
 /*-----------功能函數區----------*/
 
 
@@ -58,3 +53,6 @@ foreach ($item_list as $item_id => $item_name) {
 
 echo $formi->render();
 
+/*-----------秀出結果區--------------*/
+$xoopsTpl->assign('now_op', $op);
+require_once __DIR__ . '/footer.php';

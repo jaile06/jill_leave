@@ -214,12 +214,9 @@ class Tools
         redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_PERMISSION);
     }
 
-    //取得管理人員 Email 設定（優先讀模組偏好 adm_email，向下相容舊 jill_leave_adm_email）
+    //取得管理人員 Email 設定（讀模組偏好 adm_email）
     public static function get_admin_email($mode = '')
     {
-        global $xoopsDB;
-
-        //優先從模組偏好設定讀取
         $conf_value = '';
         $module_handler = xoops_getHandler('module');
         $config_handler = xoops_getHandler('config');
@@ -231,55 +228,11 @@ class Tools
             }
         }
 
-        //向下相容：若模組偏好無值，嘗試讀舊欄位
-        if ($conf_value === '') {
-            $sql    = "SELECT `conf_value` FROM `" . $xoopsDB->prefix('config') . "` WHERE `conf_name` = 'jill_leave_adm_email'";
-            $result = $xoopsDB->query($sql);
-            if ($result) {
-                $row = $xoopsDB->fetchRow($result);
-                $conf_value = $row ? (string) $row[0] : '';
-            }
-        }
-
         if ($mode == 'array') {
             $emails = array_filter(array_map('trim', explode(';', $conf_value)));
             return $emails;
         }
         return $conf_value;
-    }
-
-    //更新管理人員 Email 設定（多筆以「;」隔開）
-    public static function set_admin_email($emails = '')
-    {
-        global $xoopsDB;
-
-        $email_arr = array_filter(array_map('trim', explode(';', $emails)));
-        $emails    = $xoopsDB->escape(implode(';', $email_arr));
-
-        $sql    = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix('config') . "` WHERE `conf_name` = 'jill_leave_adm_email'";
-        $result = $xoopsDB->query($sql) or \XoopsModules\Tadtools\Utility::web_error($sql);
-        list($count) = $xoopsDB->fetchRow($result);
-
-        if ($count) {
-            $sql = "UPDATE `" . $xoopsDB->prefix('config') . "` SET `conf_value` = '{$emails}' WHERE `conf_name` = 'jill_leave_adm_email'";
-        } else {
-            $mid = 0;
-            $module_handler = xoops_getHandler('module');
-            $module = $module_handler->getByDirname('jill_leave');
-            if (is_object($module)) {
-                $mid = (int) $module->getVar('mid');
-            }
-            $sql = "INSERT INTO `" . $xoopsDB->prefix('config') . "`
-                (`conf_modid`, `conf_catid`, `conf_name`, `conf_title`, `conf_value`, `conf_desc`, `conf_formtype`, `conf_valuetype`, `conf_order`)
-                VALUES ('{$mid}', '0', 'jill_leave_adm_email', '_MD_JILLLEAVE_ADM_EMAIL', '{$emails}', '', 'textbox', 'text', '0')";
-        }
-        $xoopsDB->queryF($sql) or \XoopsModules\Tadtools\Utility::web_error($sql);
-
-        //重設所有使用者的權限快取需重新登入才會生效，僅更新自己的 session
-        unset($_SESSION['jill_leave_adm']);
-        self::get_session();
-
-        return true;
     }
 
     //更新模組偏好設定值（透過 XOOPS ConfigHandler）

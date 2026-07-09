@@ -204,7 +204,12 @@
                     <{/foreach}>
                 </select>
                 <span class="input-group-text">年</span>
-                <input type="text" class="form-control gc-class" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}>" disabled>
+                <select class="form-select gc-class" disabled>
+                    <option value=""><{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}></option>
+                    <{section name=j start=1 loop=$class_room_max+1}>
+                        <option value="<{$smarty.section.j.index}>"><{$smarty.section.j.index}></option>
+                    <{/section}>
+                </select>
                 <span class="input-group-text">班</span>
             </div>
         </div>

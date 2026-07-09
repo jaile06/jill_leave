@@ -29,11 +29,13 @@
     <li class="w8"><{$is_advisor_text}></li>
 </ul>
 
-<!--導師班級-->
+<!--導師班級（科任無單一班級，班級列於下方代課明細）-->
+<{if $grade_class|default:''}>
 <ul>
     <li class="w2 vtitle"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></li>
     <li class="w8"><{$grade_class}></li>
 </ul>
+<{/if}>
 
 <!--起始日期-->
 <ul>

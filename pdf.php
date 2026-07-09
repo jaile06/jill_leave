@@ -117,11 +117,11 @@ if (!empty($substitutes)) {
             $teacher = $substitute['classes'][0]['substitute_teacher'] ?? '無';
             $detail_text = "全日代課 (代課老師：{$teacher})";
         } else {
-            // 鐘點，逐節列出
+            // 鐘點，逐節列出（class_period 已含「第X節」字樣，勿再包一層）
             $lines = [];
             foreach ($substitute['classes'] as $cls) {
-                $cls_period_name = sprintf("第%s節", $cls['class_period']);
-                $lines[] = "{$cls_period_name}：[{$cls['subject']}] {$cls['substitute_teacher']}";
+                $grade_class = ($cls['grade_class'] ?? '') !== '' ? $cls['grade_class'] : ($jill_leave['grade_class'] ?? '');
+                $lines[] = "{$cls['class_period']}：{$grade_class} [{$cls['subject']}] {$cls['substitute_teacher']}";
             }
             $detail_text = implode("\n", $lines);
         }

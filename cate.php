@@ -21,7 +21,7 @@ if ($op == 'update_sort') {
     exit;
 }
 
-$GLOBALS['xoopsOption']['template_main'] = 'jill_leave_cate.tpl';
+$GLOBALS['xoopsOption']['template_main'] = 'jill_leave_wrap.tpl';
 require_once XOOPS_ROOT_PATH . '/header.php';
 
 /*-----------執行動作判斷區----------*/
