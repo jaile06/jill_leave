@@ -71,7 +71,7 @@
                 </div>
             <{else}>
                 <div class="form-floating mb-3">
-                    <input type="text" name="start_date" id="start_date" class="form-control validate[required]" value="<{$start_date}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd', startDate:'%y-%M-%d', onpicked:checkDates})" placeholder="<{$smarty.const._MD_JILLLEAVE_START_DATE}>">
+                    <input type="text" name="start_date" id="start_date" class="form-control validate[required]" value="<{$start_date}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd', startDate:'%y-%M-%d', maxDate:'#F{$dp.$D(\'end_date\')}', onpicked:checkDates})" placeholder="<{$smarty.const._MD_JILLLEAVE_START_DATE}>">
                     <label for="start_date">請選擇<{$smarty.const._MD_JILLLEAVE_START_DATE}></label>
                 </div>
             <{/if}>
@@ -85,7 +85,7 @@
                 </div>
             <{else}>
                 <div class="form-floating mb-3">
-                    <input type="text" name="end_date" id="end_date" class="form-control validate[required]" value="<{$end_date}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd', startDate:'%y-%M-%d', onpicked:checkDates})" placeholder="<{$smarty.const._MD_JILLLEAVE_END_DATE}>">
+                    <input type="text" name="end_date" id="end_date" class="form-control validate[required]" value="<{$end_date}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd', startDate:'%y-%M-%d', minDate:'#F{$dp.$D(\'start_date\')}', onpicked:checkDates})" placeholder="<{$smarty.const._MD_JILLLEAVE_END_DATE}>">
                     <label for="end_date">請選擇<{$smarty.const._MD_JILLLEAVE_END_DATE}></label>
                 </div>
             <{/if}>

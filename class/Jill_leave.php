@@ -232,7 +232,7 @@ class Jill_leave
         $def['is_advisor'] = 0;
         $def['grade_class'] = '';
         $def['start_date'] = date("Y-m-d");
-        $def['end_date'] = date("Y-m-d");
+        $def['end_date'] = ''; //結束日期預設留空，避免選了晚於今天的起始日就觸發「起始>結束」警告
         $def['status'] = 0;
         $def['create_date'] = date("Y-m-d H:i:s");
         $def['update_date'] = date("Y-m-d H:i:s");
