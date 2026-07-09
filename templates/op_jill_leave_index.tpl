@@ -74,8 +74,11 @@
                 <{if $smarty.session.now_user|default:false}>
                     <td>
                         <{if $smarty.session.jill_leave_adm|default:false or $data.uid == $smarty.session.now_user.uid|default:0}>
-                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
-                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                            <{* 已通過的假單僅管理員可刪除/編輯 *}>
+                            <{if $smarty.session.jill_leave_adm|default:false or $data.status != 1}>
+                                <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
+                                <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                            <{/if}>
                             <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" aria-label="匯出 PDF" title="匯出 PDF"><i class="fa fa-file-pdf"></i></a>
                         <{/if}>
                     </td>

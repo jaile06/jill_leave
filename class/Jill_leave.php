@@ -152,8 +152,10 @@ class Jill_leave
         $substitutes = Jill_leave_substitute::get_all_by_leave($all['sn']);
         $xoopsTpl->assign('substitutes', $substitutes);
 
-        //是否可管理本筆資料
-        $xoopsTpl->assign('can_manage', Tools::chk_own($all['uid'], 'return'));
+        //是否可管理本筆資料；已通過的假單僅管理員可編輯/刪除
+        $can_manage = Tools::chk_own($all['uid'], 'return');
+        $xoopsTpl->assign('can_manage', $can_manage);
+        $xoopsTpl->assign('can_edit', $can_manage && (!empty($_SESSION['jill_leave_adm']) || (int) $all['status'] !== 1));
 
         //CSRF token（GET 刪除連結用，不清除以供同頁多次操作）
         $token = $GLOBALS['xoopsSecurity']->createToken();
@@ -214,6 +216,10 @@ class Jill_leave
         //僅管理者或本人可編輯
         if (!empty($jill_leave)) {
             Tools::chk_own($jill_leave['uid']);
+            //已通過的假單僅管理員可修改
+            if (empty($_SESSION['jill_leave_adm']) && (int) ($jill_leave['status'] ?? 0) === 1) {
+                redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
+            }
         } elseif (empty($xoopsUser)) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_PERMISSION);
         }
@@ -396,6 +402,11 @@ class Jill_leave
         }
         Tools::chk_own($old['uid']);
 
+        //已通過的假單僅管理員可修改/刪除
+        if (empty($_SESSION['jill_leave_adm']) && (int) ($old['status'] ?? 0) === 1) {
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
+        }
+
         // 請假者姓名強制從原始資料取得，不接受前端 POST 值
         $leavers = Tools::filter('leavers', $old['leavers'] ?? Utility::get_name_by_uid($xoopsUser->uid()), 'write', self::$filter_arr);
         $cate_sn = Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
@@ -536,6 +547,11 @@ class Jill_leave
             return;
         }
         Tools::chk_own($old['uid']);
+
+        //已通過的假單僅管理員可修改/刪除
+        if (empty($_SESSION['jill_leave_adm']) && (int) ($old['status'] ?? 0) === 1) {
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
+        }
 
         $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave") . "` WHERE `sn` = '{$sn}'";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);

@@ -7,9 +7,11 @@
 </h1>
 
 <div class="text-center">
-    <{if $can_manage|default:false}>
+    <{if $can_edit|default:false}>
         <a href="javascript:jill_leave_destroy_func(<{$sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-times" aria-hidden="true"></i></a>
         <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$sn}>" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil" aria-hidden="true"></i> <{$smarty.const._TAD_EDIT}></a>
+    <{/if}>
+    <{if $can_manage|default:false}>
         <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="<{$smarty.const._TAD_ADD}>"><i class="fa fa-plus" aria-hidden="true"></i> <{$smarty.const._TAD_ADD}></a>
         <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$sn}>" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="匯出 PDF"><i class="fa fa-file-pdf" aria-hidden="true"></i> PDF</a>
     <{/if}>

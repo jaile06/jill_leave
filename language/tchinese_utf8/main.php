@@ -91,6 +91,7 @@ define('_MD_JILLLEAVE_DISABLED', '已停用');
 //訊息
 define('_MD_JILLLEAVE_DUPLICATE_LEAVE', '您在該日期區間已有假單，無法重複請假');
 define('_MD_JILLLEAVE_TOKEN_ERROR', '安全驗證失敗，請重新整理頁面後再試');
+define('_MD_JILLLEAVE_APPROVED_LOCKED', '假單已通過審核，僅管理員可修改或刪除');
 define('_MD_JILLLEAVE_NO_PERMISSION', '無操作權限');
 define('_MD_JILLLEAVE_NO_CONDITION', '無查詢條件');
 define('_MD_JILLLEAVE_SUBSTITUTE_SAVE_FAIL', '代課資料儲存失敗，請假資料未寫入，請重新操作');
