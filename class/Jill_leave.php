@@ -472,8 +472,15 @@ class Jill_leave
         $is_advisor = (int) ($_POST['is_advisor'] ?? 0);
         $main_grade_class = trim((string) ($_POST['grade_class'] ?? ''));
 
+        //代課日期須落在請假起訖區間內，超出者略過（前端未連動時的殘留資料）
+        $start_date = trim((string) ($_POST['start_date'] ?? ''));
+        $end_date = trim((string) ($_POST['end_date'] ?? ''));
+
         foreach ($_POST['substitute_date'] as $i => $date) {
             $date = $xoopsDB->escape(trim($date));
+            if ($start_date !== '' && $end_date !== '' && ($date < $start_date || $date > $end_date)) {
+                continue;
+            }
             $class_period = Tools::filter('class_period', $_POST['class_period'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
             $substitute_teacher = Tools::filter('substitute_teacher', $_POST['substitute_teacher'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
             $pay = in_array($_POST['pay'][$i] ?? '', ['self', 'school'], true) ? $_POST['pay'][$i] : 'self';

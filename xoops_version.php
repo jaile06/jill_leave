@@ -1,6 +1,5 @@
 <?php
 
-
 $modversion = [];
 
 //---模組基本資訊---//
@@ -49,7 +48,7 @@ $modversion['system_menu'] = 1;
 
 //---後台管理介面設定---//
 $modversion['hasAdmin']   = 1;
-$modversion['adminindex'] = 'admin/main.php';
+$modversion['adminindex'] = 'admin/index.php';
 $modversion['adminmenu']  = 'admin/menu.php';
 
 //---前台主選單設定---//

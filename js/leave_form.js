@@ -229,9 +229,9 @@
             : [];
         var existing = group_existing(cfg.existing || []);
 
-        // 既有資料中不在區間內的日期（例如週日補班）也要顯示
+        // 既有資料中在區間內但被跳過的日期（例如週日補班）也要顯示；區間外的殘留資料不顯示
         $.each(existing.dates, function (i, date) {
-            if ($.inArray(date, dates) === -1) {
+            if ($.inArray(date, dates) === -1 && date >= cfg.start_date && date <= cfg.end_date) {
                 dates.push(date);
             }
         });
@@ -407,6 +407,17 @@
 
         bind_events();
         bind_submit();
+
+        // 手動輸入日期（未經 My97 onpicked）也要連動重算卡片
+        $('#start_date, #end_date').on('change', window.checkDates);
+
+        // 在輸入欄按 Enter 不隱式送出表單，改為觸發 change（日期欄會連動重算卡片）
+        $('#myForm').on('keydown', 'input', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $(this).trigger('change');
+            }
+        });
 
         // 選科任時清空年級班級下拉，並切換逐節班級欄位顯示
         $('input[name="is_advisor"]').on('change', function () {
