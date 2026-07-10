@@ -173,11 +173,13 @@ class Jill_leave_substitute
             LEFT JOIN `" . $xoopsDB->prefix("jill_leave") . "` AS l ON s.`sn` = l.`sn`
             LEFT JOIN `" . $xoopsDB->prefix("jill_leave_cate") . "` AS c ON l.`cate_sn` = c.`cate_sn`
             WHERE DATE_FORMAT(s.`substitute_date`, '%Y-%m') = '" . $xoopsDB->escape($month) . "'
-            ORDER BY s.`substitute_date`, s.`substitute_sn`";
+            ORDER BY s.`sn`, s.`substitute_date`";
         $result = $xoopsDB->query($sql) or Utility::web_error($sql);
 
         $data_arr = [];
         $substitute_sns = [];
+        $leaves_data = []; // ponytail: group substitutes by leave sn
+        $detail_map = []; // ponytail: map substitute_sn to detail data for excel/template
         while ($data = $xoopsDB->fetchArray($result)) {
             $data = Tools::filter_all_data('read', $data, self::$filter_arr);
             $data['status_text'] = Jill_leave::status_text($data['status']);
@@ -185,7 +187,25 @@ class Jill_leave_substitute
             $data['type_text'] = ($data['type'] == 'hour') ? _MD_JILLLEAVE_TYPE_HOUR : _MD_JILLLEAVE_TYPE_DAILY;
             $data['classes'] = [];
             $data_arr[$data['substitute_sn']] = $data;
+            $detail_map[$data['substitute_sn']] = $data;
             $substitute_sns[] = (int) $data['substitute_sn'];
+
+            if (!isset($leaves_data[$data['sn']])) {
+                $leaves_data[$data['sn']] = [
+                    'sn' => $data['sn'],
+                    'leavers' => $data['leavers'],
+                    'is_advisor' => $data['is_advisor'],
+                    'grade_class' => $data['grade_class'],
+                    'cate_sn' => $data['cate_sn'],
+                    'cate_title' => $data['cate_title'],
+                    'start_date' => $data['start_date'],
+                    'end_date' => $data['end_date'],
+                    'status' => $data['status'],
+                    'status_text' => $data['status_text'],
+                    'substitutes' => [],
+                ];
+            }
+            $leaves_data[$data['sn']]['substitutes'][] = $data['substitute_sn'];
         }
 
         //一次撈出所有節次明細
@@ -196,13 +216,13 @@ class Jill_leave_substitute
             while ($class = $xoopsDB->fetchArray($result)) {
                 //解析 subject（JSON→班級＋科目）並套顯示過濾
                 $class = Jill_leave_class::display_class($class);
-                if (isset($data_arr[$class['substitute_sn']])) {
-                    $data_arr[$class['substitute_sn']]['classes'][] = $class;
+                if (isset($detail_map[$class['substitute_sn']])) {
+                    $detail_map[$class['substitute_sn']]['classes'][] = $class;
                 }
             }
         }
 
-        return [array_values($data_arr), $month];
+        return [array_values($leaves_data), $detail_map, $month];
     }
 
 
@@ -212,9 +232,15 @@ class Jill_leave_substitute
         global $xoopsTpl;
         Tools::chk_is_adm('', '', __FILE__, __LINE__);
 
-        list($data_arr, $month) = self::get_overview_data($month);
+        list($leaves, $all_substitute_detail, $month) = self::get_overview_data($month);
 
-        $xoopsTpl->assign('all_substitute', $data_arr);
+        //待審核(0)排最前，其次已通過(1)、駁回(2)；同狀態維持原日期順序
+        usort($leaves, function ($a, $b) {
+            return $a['status'] <=> $b['status'];
+        });
+
+        $xoopsTpl->assign('all_leaves', $leaves);
+        $xoopsTpl->assign('all_substitute_detail', $all_substitute_detail);
         $xoopsTpl->assign('month', $month);
 
         //CSRF token（GET 刪除連結與 AJAX 狀態切換共用，不清除以供同頁多次操作）
@@ -246,11 +272,11 @@ class Jill_leave_substitute
 
         require_once XOOPS_ROOT_PATH . '/modules/tadtools/vendor/autoload.php';
 
-        list($data_arr, $month) = self::get_overview_data($month);
+        list($leaves, $all_substitute_detail, $month) = self::get_overview_data($month);
 
         //鐘點費清冊僅列入已通過（status=1）之假單，待審核／駁回者不予列入（總覽頁仍顯示全部狀態供管理者審核）
-        $data_arr = array_values(array_filter($data_arr, static function ($substitute) {
-            return (int) ($substitute['status'] ?? 0) === 1;
+        $leaves = array_values(array_filter($leaves, static function ($leave) {
+            return (int) ($leave['status'] ?? 0) === 1;
         }));
 
         $excel = new \PHPExcel();
@@ -274,24 +300,57 @@ class Jill_leave_substitute
             $sheet->setCellValueByColumnAndRow($col, 1, $title);
         }
 
-        //資料列（每一節次一列）
-        $row = 2;
-        foreach ($data_arr as $substitute) {
-            $classes = $substitute['classes'] ?: [['class_period' => '', 'subject' => '', 'grade_class' => '', 'substitute_teacher' => '']];
-            foreach ($classes as $class) {
-                //班級欄：科任逐節班級優先，無則用導師班級
-                $grade_class = ($class['grade_class'] ?? '') !== '' ? $class['grade_class'] : $substitute['grade_class'];
-                $sheet->setCellValueByColumnAndRow(0, $row, $substitute['substitute_date']);
-                $sheet->setCellValueByColumnAndRow(1, $row, $substitute['leavers']);
-                $sheet->setCellValueByColumnAndRow(2, $row, $substitute['cate_title']);
-                $sheet->setCellValueByColumnAndRow(3, $row, $grade_class);
-                $sheet->setCellValueByColumnAndRow(4, $row, $class['class_period']);
-                $sheet->setCellValueByColumnAndRow(5, $row, $class['subject']);
-                $sheet->setCellValueByColumnAndRow(6, $row, $class['substitute_teacher']);
-                $sheet->setCellValueByColumnAndRow(7, $row, $substitute['pay_text']);
-                $sheet->setCellValueByColumnAndRow(8, $row, $substitute['type_text']);
-                $row++;
+        // 收集所有要匯出的資料列
+        $export_data = [];
+        foreach ($leaves as $leave) {
+            foreach ($leave['substitutes'] as $substitute_sn) {
+                $substitute = $all_substitute_detail[$substitute_sn] ?? null;
+                if (!$substitute) continue;
+                $classes = $substitute['classes'] ?: [['class_period' => '', 'subject' => '', 'grade_class' => '', 'substitute_teacher' => '']];
+                foreach ($classes as $class) {
+                    // 班級欄：科任逐節班級優先，無則用導師班級
+                    $grade_class = ($class['grade_class'] ?? '') !== '' ? $class['grade_class'] : $leave['grade_class'];
+                    $export_data[] = [
+                        'date'               => $substitute['substitute_date'],
+                        'leaver'             => $leave['leavers'],
+                        'cate_title'         => $leave['cate_title'],
+                        'grade_class'        => $grade_class,
+                        'class_period'       => $class['class_period'],
+                        'subject'            => $class['subject'],
+                        'substitute_teacher' => $class['substitute_teacher'],
+                        'pay_text'           => $substitute['pay_text'],
+                        'type_text'          => $substitute['type_text'],
+                    ];
+                }
             }
+        }
+
+        // 以代課日期為第一優先進行排序 (若日期相同，則再比對請假人與節次)
+        usort($export_data, static function ($a, $b) {
+            $date_compare = strcmp($a['date'], $b['date']);
+            if ($date_compare !== 0) {
+                return $date_compare;
+            }
+            $leaver_compare = strcmp($a['leaver'], $b['leaver']);
+            if ($leaver_compare !== 0) {
+                return $leaver_compare;
+            }
+            return strcmp($a['class_period'], $b['class_period']);
+        });
+
+        // 資料列寫入 Excel
+        $row = 2;
+        foreach ($export_data as $data) {
+            $sheet->setCellValueByColumnAndRow(0, $row, $data['date']);
+            $sheet->setCellValueByColumnAndRow(1, $row, $data['leaver']);
+            $sheet->setCellValueByColumnAndRow(2, $row, $data['cate_title']);
+            $sheet->setCellValueByColumnAndRow(3, $row, $data['grade_class']);
+            $sheet->setCellValueByColumnAndRow(4, $row, $data['class_period']);
+            $sheet->setCellValueByColumnAndRow(5, $row, $data['subject']);
+            $sheet->setCellValueByColumnAndRow(6, $row, $data['substitute_teacher']);
+            $sheet->setCellValueByColumnAndRow(7, $row, $data['pay_text']);
+            $sheet->setCellValueByColumnAndRow(8, $row, $data['type_text']);
+            $row++;
         }
 
         //改用 Excel2007 (xlsx) 寫入器：PHPExcel 的 Excel5 (xls) 寫入器內部仍使用 PHP8 已移除的
