@@ -15,7 +15,7 @@ CREATE TABLE `jill_leave` (
   KEY `idx_cate_sn` (`cate_sn`),
   KEY `idx_dates` (`start_date`, `end_date`),
   KEY `idx_status` (`status`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='請假主表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='請假主表';
 
 CREATE TABLE `jill_leave_cate` (
   `cate_sn` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT '假別編號',
@@ -25,7 +25,7 @@ CREATE TABLE `jill_leave_cate` (
   PRIMARY KEY (`cate_sn`),
   KEY `idx_sort` (`cate_sort`),
   KEY `idx_enable` (`enable`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='假別分類表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='假別分類表';
 
 
 CREATE TABLE `jill_leave_class` (
@@ -38,7 +38,7 @@ CREATE TABLE `jill_leave_class` (
   PRIMARY KEY (`class_sn`),
   KEY `idx_substitute_sn` (`substitute_sn`),
   KEY `idx_sn` (`sn`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代課節次明細表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='代課節次明細表';
 
 CREATE TABLE `jill_leave_substitute` (
   `substitute_sn` mediumint(8) unsigned NOT NULL AUTO_INCREMENT COMMENT '代課編號',
@@ -49,7 +49,7 @@ CREATE TABLE `jill_leave_substitute` (
   PRIMARY KEY (`substitute_sn`),
   KEY `idx_sn` (`sn`),
   KEY `idx_date` (`substitute_date`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代課日期表';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COMMENT='代課日期表';
 
 
 INSERT INTO `jill_leave_cate` (`cate_title`, `cate_sort`, `enable`) VALUES
