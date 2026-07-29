@@ -112,7 +112,7 @@ class Jill_leave_substitute
         foreach ($substitutes as $substitute_sn => $substitute) {
             $substitutes[$substitute_sn]['classes'] = [];
             $substitutes[$substitute_sn]['pay_text'] = ($substitute['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF;
-            $substitutes[$substitute_sn]['type_text'] = ($substitute['type'] == 'hour') ? _MD_JILLLEAVE_TYPE_HOUR : _MD_JILLLEAVE_TYPE_DAILY;
+            $substitutes[$substitute_sn]['type_text'] = match ($substitute['type']) { 'hour' => _MD_JILLLEAVE_TYPE_HOUR, 'swap' => _MD_JILLLEAVE_TYPE_SWAP, default => _MD_JILLLEAVE_TYPE_DAILY };
         }
         foreach ($classes as $class) {
             $class = Jill_leave_class::display_class($class);
@@ -152,6 +152,10 @@ class Jill_leave_substitute
                     'subject' => $class['subject'],
                     'grade_class' => $class['grade_class'] ?? '',
                     'substitute_teacher' => $class['substitute_teacher'],
+                    'handle' => $class['handle'] ?? 'substitute',
+                    'swap_date' => $class['swap_date'] ?? '',
+                    'swap_period' => $class['swap_period'] ?? '',
+                    'swap_subject' => $class['swap_subject'] ?? '',
                 ];
             }
         }
@@ -184,7 +188,7 @@ class Jill_leave_substitute
             $data = Tools::filter_all_data('read', $data, self::$filter_arr);
             $data['status_text'] = Jill_leave::status_text($data['status']);
             $data['pay_text'] = ($data['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF;
-            $data['type_text'] = ($data['type'] == 'hour') ? _MD_JILLLEAVE_TYPE_HOUR : _MD_JILLLEAVE_TYPE_DAILY;
+            $data['type_text'] = match ($data['type']) { 'hour' => _MD_JILLLEAVE_TYPE_HOUR, 'swap' => _MD_JILLLEAVE_TYPE_SWAP, default => _MD_JILLLEAVE_TYPE_DAILY };
             $data['classes'] = [];
             $data_arr[$data['substitute_sn']] = $data;
             $detail_map[$data['substitute_sn']] = $data;
@@ -260,32 +264,25 @@ class Jill_leave_substitute
     public static function export_excel($month = '')
     {
         Tools::chk_is_adm('', '', __FILE__, __LINE__);
-
-        // 暫時開啟 display_errors 以供偵錯
-        error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_NOTICE);
-        ini_set('display_errors', 1);
-        /*
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-        */
-
         require_once XOOPS_ROOT_PATH . '/modules/tadtools/vendor/autoload.php';
 
         list($leaves, $all_substitute_detail, $month) = self::get_overview_data($month);
 
-        //鐘點費清冊僅列入已通過（status=1）之假單，待審核／駁回者不予列入（總覽頁仍顯示全部狀態供管理者審核）
+        //僅列入已通過 (status=1) 之假單
         $leaves = array_values(array_filter($leaves, static function ($leave) {
             return (int) ($leave['status'] ?? 0) === 1;
         }));
 
         $excel = new \PHPExcel();
         $excel->getProperties()->setTitle(_MD_JILLLEAVE_EXPORT_TITLE . $month);
-        $sheet = $excel->setActiveSheetIndex(0);
-        $sheet->setTitle($month);
+        
+        // -------------------------------------------------------------
+        // Sheet 0: 鐘點費代課清冊 (僅含委託代課)
+        // -------------------------------------------------------------
+        $sheet0 = $excel->setActiveSheetIndex(0);
+        $sheet0->setTitle($month . ' 鐘點費代課');
 
-        //標題列
-        $titles = [
+        $titles0 = [
             _MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE,
             _MD_JILLLEAVE_LEAVERS,
             _MD_JILLLEAVE_CATE_CATE_TITLE,
@@ -296,77 +293,131 @@ class Jill_leave_substitute
             _MD_JILLLEAVE_SUBSTITUTE_PAY,
             _MD_JILLLEAVE_SUBSTITUTE_TYPE,
         ];
-        foreach ($titles as $col => $title) {
-            $sheet->setCellValueByColumnAndRow($col, 1, $title);
+        foreach ($titles0 as $col => $title) {
+            $sheet0->setCellValueByColumnAndRow($col, 1, $title);
+        }
+
+        // -------------------------------------------------------------
+        // Sheet 1: 補調課備查表 (含自己補課與與他人調課)
+        // -------------------------------------------------------------
+        $sheet1 = $excel->createSheet(1);
+        $sheet1->setTitle('補調課備查表');
+
+        $titles1 = [
+            '原請假日期',
+            _MD_JILLLEAVE_LEAVERS,
+            _MD_JILLLEAVE_CATE_CATE_TITLE,
+            _MD_JILLLEAVE_GRADE_CLASS,
+            '原節次',
+            '原科目',
+            _MD_JILLLEAVE_HANDLE,
+            _MD_JILLLEAVE_CHANGED_DATE,
+            _MD_JILLLEAVE_CHANGED_PERIOD,
+            '對調/補課教師',
+            _MD_JILLLEAVE_SWAP_SUBJECT,
+        ];
+        foreach ($titles1 as $col => $title) {
+            $sheet1->setCellValueByColumnAndRow($col, 1, $title);
         }
 
         // 收集所有要匯出的資料列
-        $export_data = [];
+        $export_data0 = []; // 代課
+        $export_data1 = []; // 補調課
+
         foreach ($leaves as $leave) {
             foreach ($leave['substitutes'] as $substitute_sn) {
                 $substitute = $all_substitute_detail[$substitute_sn] ?? null;
                 if (!$substitute) continue;
                 $classes = $substitute['classes'] ?: [['class_period' => '', 'subject' => '', 'grade_class' => '', 'substitute_teacher' => '']];
                 foreach ($classes as $class) {
-                    // 班級欄：科任逐節班級優先，無則用導師班級
+                    $handle = $class['handle'] ?? 'substitute';
                     $grade_class = ($class['grade_class'] ?? '') !== '' ? $class['grade_class'] : $leave['grade_class'];
-                    $export_data[] = [
-                        'date'               => $substitute['substitute_date'],
-                        'leaver'             => $leave['leavers'],
-                        'cate_title'         => $leave['cate_title'],
-                        'grade_class'        => $grade_class,
-                        'class_period'       => $class['class_period'],
-                        'subject'            => $class['subject'],
-                        'substitute_teacher' => $class['substitute_teacher'],
-                        'pay_text'           => $substitute['pay_text'],
-                        'type_text'          => $substitute['type_text'],
-                    ];
+
+                    if ($substitute['type'] === 'swap' || $handle !== 'substitute') {
+                        // 補調課資料 -> 進入 Sheet 1
+                        $handle_text = ($handle === 'makeup') ? _MD_JILLLEAVE_HANDLE_MAKEUP : _MD_JILLLEAVE_HANDLE_SWAP;
+                        $export_data1[] = [
+                            'date'         => $substitute['substitute_date'],
+                            'leaver'       => $leave['leavers'],
+                            'cate_title'   => $leave['cate_title'],
+                            'grade_class'  => $grade_class,
+                            'class_period' => $class['class_period'],
+                            'subject'      => $class['subject'],
+                            'handle_text'  => $handle_text,
+                            'swap_date'    => $class['swap_date'] ?? '',
+                            'swap_period'  => $class['swap_period'] ?? '',
+                            'teacher'      => $class['substitute_teacher'] ?? '',
+                            'swap_subject' => $class['swap_subject'] ?? '',
+                        ];
+                    } else {
+                        // 鐘點費代課資料 -> 進入 Sheet 0
+                        $export_data0[] = [
+                            'date'               => $substitute['substitute_date'],
+                            'leaver'             => $leave['leavers'],
+                            'cate_title'         => $leave['cate_title'],
+                            'grade_class'        => $grade_class,
+                            'class_period'       => $class['class_period'],
+                            'subject'            => $class['subject'],
+                            'substitute_teacher' => $class['substitute_teacher'],
+                            'pay_text'           => $substitute['pay_text'],
+                            'type_text'          => $substitute['type_text'],
+                        ];
+                    }
                 }
             }
         }
 
-        // 以代課日期為第一優先進行排序 (若日期相同，則再比對請假人與節次)
-        usort($export_data, static function ($a, $b) {
+        // 排序函數
+        $sorter = static function ($a, $b) {
             $date_compare = strcmp($a['date'], $b['date']);
-            if ($date_compare !== 0) {
-                return $date_compare;
-            }
+            if ($date_compare !== 0) return $date_compare;
             $leaver_compare = strcmp($a['leaver'], $b['leaver']);
-            if ($leaver_compare !== 0) {
-                return $leaver_compare;
-            }
+            if ($leaver_compare !== 0) return $leaver_compare;
             return strcmp($a['class_period'], $b['class_period']);
-        });
+        };
+        usort($export_data0, $sorter);
+        usort($export_data1, $sorter);
 
-        // 資料列寫入 Excel
+        // 寫入 Sheet 0
         $row = 2;
-        foreach ($export_data as $data) {
-            $sheet->setCellValueByColumnAndRow(0, $row, $data['date']);
-            $sheet->setCellValueByColumnAndRow(1, $row, $data['leaver']);
-            $sheet->setCellValueByColumnAndRow(2, $row, $data['cate_title']);
-            $sheet->setCellValueByColumnAndRow(3, $row, $data['grade_class']);
-            $sheet->setCellValueByColumnAndRow(4, $row, $data['class_period']);
-            $sheet->setCellValueByColumnAndRow(5, $row, $data['subject']);
-            $sheet->setCellValueByColumnAndRow(6, $row, $data['substitute_teacher']);
-            $sheet->setCellValueByColumnAndRow(7, $row, $data['pay_text']);
-            $sheet->setCellValueByColumnAndRow(8, $row, $data['type_text']);
+        foreach ($export_data0 as $data) {
+            $sheet0->setCellValueByColumnAndRow(0, $row, $data['date']);
+            $sheet0->setCellValueByColumnAndRow(1, $row, $data['leaver']);
+            $sheet0->setCellValueByColumnAndRow(2, $row, $data['cate_title']);
+            $sheet0->setCellValueByColumnAndRow(3, $row, $data['grade_class']);
+            $sheet0->setCellValueByColumnAndRow(4, $row, $data['class_period']);
+            $sheet0->setCellValueByColumnAndRow(5, $row, $data['subject']);
+            $sheet0->setCellValueByColumnAndRow(6, $row, $data['substitute_teacher']);
+            $sheet0->setCellValueByColumnAndRow(7, $row, $data['pay_text']);
+            $sheet0->setCellValueByColumnAndRow(8, $row, $data['type_text']);
             $row++;
         }
 
-        //改用 Excel2007 (xlsx) 寫入器：PHPExcel 的 Excel5 (xls) 寫入器內部仍使用 PHP8 已移除的
-        //大括號字串/陣列偏移語法（Writer/Excel5/Parser.php），在 PHP 8.0+ 下無論有無公式一律 Fatal error。
-        //Excel2007 寫入器不會經過該檔案，故可在不修改 vendor 套件的情況下修復匯出功能。
+        // 寫入 Sheet 1
+        $row = 2;
+        foreach ($export_data1 as $data) {
+            $sheet1->setCellValueByColumnAndRow(0, $row, $data['date']);
+            $sheet1->setCellValueByColumnAndRow(1, $row, $data['leaver']);
+            $sheet1->setCellValueByColumnAndRow(2, $row, $data['cate_title']);
+            $sheet1->setCellValueByColumnAndRow(3, $row, $data['grade_class']);
+            $sheet1->setCellValueByColumnAndRow(4, $row, $data['class_period']);
+            $sheet1->setCellValueByColumnAndRow(5, $row, $data['subject']);
+            $sheet1->setCellValueByColumnAndRow(6, $row, $data['handle_text']);
+            $sheet1->setCellValueByColumnAndRow(7, $row, $data['swap_date']);
+            $sheet1->setCellValueByColumnAndRow(8, $row, $data['swap_period']);
+            $sheet1->setCellValueByColumnAndRow(9, $row, $data['teacher']);
+            $sheet1->setCellValueByColumnAndRow(10, $row, $data['swap_subject']);
+            $row++;
+        }
+
+        $excel->setActiveSheetIndex(0);
+
         $filename = "jill_leave_{$month}.xlsx";
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment;filename=\"{$filename}\"");
         header('Cache-Control: max-age=0');
 
         $writer = \PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
-        /*
-        if (ob_get_level()) {
-            ob_clean();
-        }
-        */
         $writer->save('php://output');
         exit;
     }

@@ -34,7 +34,7 @@ define('_MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_SN', '代課編號');
 define('_MD_JILLLEAVE_SUBSTITUTE_SN', '關聯請假編號');
 define('_MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE', '代課日期');
 define('_MD_JILLLEAVE_SUBSTITUTE_PAY', '支付方式');
-define('_MD_JILLLEAVE_SUBSTITUTE_TYPE', '代課類型');
+define('_MD_JILLLEAVE_SUBSTITUTE_TYPE', '調代課類型');
 define('_MD_JILLLEAVE_ADM', '設定管理員');
 
 //顯示用文字
@@ -47,6 +47,7 @@ define('_MD_JILLLEAVE_PAY_SELF', '自費');
 define('_MD_JILLLEAVE_PAY_SCHOOL', '公費');
 define('_MD_JILLLEAVE_TYPE_DAILY', '日薪');
 define('_MD_JILLLEAVE_TYPE_HOUR', '鐘點');
+define('_MD_JILLLEAVE_TYPE_SWAP', '補調課');
 
 //代課批次表單
 define('_MD_JILLLEAVE_SUBSTITUTE_INFO', '代課資訊');
@@ -65,6 +66,25 @@ define('_MD_JILLLEAVE_MSG_NO_PERIOD', '尚未勾選代課節次');
 define('_MD_JILLLEAVE_MSG_NO_SUBJECT', '請輸入科目');
 define('_MD_JILLLEAVE_MSG_NO_TEACHER', '請輸入代課老師');
 define('_MD_JILLLEAVE_MSG_NO_GRADE_CLASS', '請選擇代課班級');
+
+//遺課處理方式（委託代課／自己補課／與他人調課）
+define('_MD_JILLLEAVE_HANDLE', '處理方式');
+define('_MD_JILLLEAVE_HANDLE_SUBSTITUTE', '委託代課');
+define('_MD_JILLLEAVE_HANDLE_MAKEUP', '自己補課');
+define('_MD_JILLLEAVE_HANDLE_SWAP', '與他人調課');
+define('_MD_JILLLEAVE_CHANGED', '異動後');
+define('_MD_JILLLEAVE_CHANGED_DATE', '異動後日期');
+define('_MD_JILLLEAVE_CHANGED_PERIOD', '異動後節次');
+define('_MD_JILLLEAVE_SWAP_SUBJECT', '對調科目');
+define('_MD_JILLLEAVE_SWAP_TEACHER', '對調教師');
+define('_MD_JILLLEAVE_MSG_NO_CHANGED', '請選擇異動後日期與節次');
+define('_MD_JILLLEAVE_MSG_NO_SWAP_TEACHER', '請輸入對調教師');
+
+//核章欄（僅列印用，不寫入資料庫）
+define('_MD_JILLLEAVE_SIGN_TEACHER', '請假教師');
+define('_MD_JILLLEAVE_SIGN_GROUP_LEADER', '教學組長');
+define('_MD_JILLLEAVE_SIGN_DIRECTOR', '教務主任');
+define('_MD_JILLLEAVE_SIGN_TITLE', '核章');
 
 //科任逐節班級
 define('_MD_JILLLEAVE_GRADE_SELECT', '年級');

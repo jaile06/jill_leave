@@ -146,7 +146,7 @@
                     <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="school"> <{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL_FULL}></label>
                 </div>
             </div>
-            <!--代課類型-->
+            <!--調代課類型-->
             <div class="d-inline-flex align-items-center">
                 <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></span>
                 <div class="form-check form-check-inline">
@@ -154,6 +154,9 @@
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="hour"> <{$smarty.const._MD_JILLLEAVE_TYPE_HOUR}></label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="swap"> <{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}></label>
                 </div>
             </div>
             <!--同第一天按鈕（非第一張卡片才顯示）-->
@@ -179,22 +182,25 @@
                     </div>
                 </div>
             </div>
-            <!--鐘點：勾選節次逐節填寫（節次列由 JS 依 period_row_tpl 範本生成）-->
+            <!--鐘點代課：純委託代課，乾淨單行-->
             <div class="hour-panel d-none"></div>
+            <!--補調課：自己補課／與他人調課，整齊雙對稱層級-->
+            <div class="swap-panel d-none"></div>
         </div>
     </div>
 </template>
 
-<!--鐘點節次列範本-->
+<!--鐘點代課節次列範本（純委託代課）-->
 <template id="period_row_tpl">
-    <div class="row g-2 align-items-center mb-1 period-row">
-        <!--勾選節次（手機4格，平板以上1格）-->
+  <div class="period-row border-bottom pb-1 mb-1">
+    <div class="row g-2 align-items-center">
+        <!--勾選節次-->
         <div class="col-4 col-sm-3 col-md-1">
             <div class="form-check">
                 <label class="form-check-label"><input type="checkbox" class="form-check-input period-check"> <span class="period-text"></span></label>
             </div>
         </div>
-        <!--科任逐節班級（年級下拉＋班級文字框），級任隱藏；手機佔8格-->
+        <!--科任逐節班級-->
         <div class="col-8 col-sm-9 col-md-3 grade-class-wrap">
             <div class="input-group input-group-sm">
                 <select class="form-select gc-grade" aria-label="<{$smarty.const._MD_JILLLEAVE_GRADE_SELECT}>" disabled>
@@ -213,12 +219,14 @@
                 <span class="input-group-text">班</span>
             </div>
         </div>
-        <!--科目（手機整行）-->
+        <!--科目-->
         <div class="col-12 col-md-2">
             <input type="text" class="form-control form-control-sm subject-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" disabled>
         </div>
-        <!--代課老師選項（手機整行）-->
-        <div class="col-12 col-md-auto">
+        <!--預設固定為委託代課-->
+        <input type="hidden" class="handle-select" value="substitute">
+        <!--代課老師選項-->
+        <div class="col-12 col-md-auto teacher-opt-wrap">
             <div class="form-check form-check-inline">
                 <label class="form-check-label"><input type="radio" class="form-check-input teacher-opt" value="assign" checked disabled> <{$smarty.const._MD_JILLLEAVE_TEACHER_ASSIGN}></label>
             </div>
@@ -226,12 +234,76 @@
                 <label class="form-check-label"><input type="radio" class="form-check-input teacher-opt" value="input" disabled> <{$smarty.const._MD_JILLLEAVE_TEACHER_INPUT}></label>
             </div>
         </div>
-        <!--代課老師姓名（手機整行）-->
-        <div class="col-12 col-md">
+        <!--代課老師姓名-->
+        <div class="col-12 col-md teacher-name-wrap">
             <input type="text" class="form-control form-control-sm teacher-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>" disabled>
         </div>
     </div>
+  </div>
+</template>
 
+<!--補調課節次列範本（上排原課程、下排異動後對稱美化）-->
+<template id="swap_period_row_tpl">
+  <div class="period-row p-2 mb-2 rounded bg-light border">
+    <!--上排：原課程資訊-->
+    <div class="row g-2 align-items-center">
+        <div class="col-4 col-sm-3 col-md-1">
+            <div class="form-check">
+                <label class="form-check-label"><input type="checkbox" class="form-check-input period-check"> <span class="period-text"></span></label>
+            </div>
+        </div>
+        <div class="col-8 col-sm-9 col-md-3 grade-class-wrap">
+            <div class="input-group input-group-sm">
+                <select class="form-select gc-grade" aria-label="<{$smarty.const._MD_JILLLEAVE_GRADE_SELECT}>" disabled>
+                    <option value=""><{$smarty.const._MD_JILLLEAVE_GRADE_SELECT}></option>
+                    <{foreach from=$grade_options item=g}>
+                        <option value="<{$g}>"><{$g}></option>
+                    <{/foreach}>
+                </select>
+                <span class="input-group-text">年</span>
+                <select class="form-select gc-class" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}>" disabled>
+                    <option value=""><{$smarty.const._MD_JILLLEAVE_CLASS_INPUT}></option>
+                    <{section name=j start=1 loop=$class_room_max+1}>
+                        <option value="<{$smarty.section.j.index}>"><{$smarty.section.j.index}></option>
+                    <{/section}>
+                </select>
+                <span class="input-group-text">班</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <input type="text" class="form-control form-control-sm subject-input" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}>" placeholder="原科目" disabled>
+        </div>
+        <div class="col-6 col-md-3">
+            <select class="form-select form-select-sm handle-select" aria-label="<{$smarty.const._MD_JILLLEAVE_HANDLE}>" disabled>
+                <option value="swap"><{$smarty.const._MD_JILLLEAVE_HANDLE_SWAP}></option>
+                <option value="makeup"><{$smarty.const._MD_JILLLEAVE_HANDLE_MAKEUP}></option>
+            </select>
+        </div>
+    </div>
+    <!--下排：異動後課程資訊-->
+    <div class="row g-2 align-items-center mt-1 pt-2 border-top changed-wrap">
+        <div class="col-auto">
+            <span class="badge bg-info"><{$smarty.const._MD_JILLLEAVE_CHANGED}></span>
+        </div>
+        <div class="col-6 col-md-3">
+            <input type="text" class="form-control form-control-sm changed-date" aria-label="<{$smarty.const._MD_JILLLEAVE_CHANGED_DATE}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CHANGED_DATE}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" disabled>
+        </div>
+        <div class="col-6 col-md-2">
+            <select class="form-select form-select-sm changed-period" aria-label="<{$smarty.const._MD_JILLLEAVE_CHANGED_PERIOD}>" disabled>
+                <option value=""><{$smarty.const._MD_JILLLEAVE_CHANGED_PERIOD}></option>
+                <{foreach from=$class_period_options item=p}>
+                    <option value="<{$p}>"><{$p}></option>
+                <{/foreach}>
+            </select>
+        </div>
+        <div class="col-6 col-md-3 teacher-name-wrap">
+            <input type="text" class="form-control form-control-sm teacher-input" aria-label="<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>" placeholder="<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>" disabled>
+        </div>
+        <div class="col-6 col-md-3 swap-subject-wrap">
+            <input type="text" class="form-control form-control-sm swap-subject-input" aria-label="<{$smarty.const._MD_JILLLEAVE_SWAP_SUBJECT}>" placeholder="<{$smarty.const._MD_JILLLEAVE_SWAP_SUBJECT}>" disabled>
+        </div>
+    </div>
+  </div>
 </template>
 
 <script type="text/javascript">
@@ -248,11 +320,15 @@ var LEAVE_FORM = {
         no_period: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_PERIOD}>',
         no_subject: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SUBJECT}>',
         no_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_TEACHER}>',
-        no_grade_class: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_GRADE_CLASS}>'
+        no_grade_class: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_GRADE_CLASS}>',
+        no_changed: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_CHANGED}>',
+        no_swap_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_TEACHER}>'
     },
+    teacher_text: '<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>',
+    swap_teacher_text: '<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>',
     copy_first_day: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>',
     copy_first_day_tip: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>',
     existing: <{$substitute_rows|@json_encode nofilter}>
 };
 </script>
-<script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js"></script>
+<script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$smarty.now}>"></script>

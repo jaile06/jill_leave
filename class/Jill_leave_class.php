@@ -12,35 +12,66 @@ class Jill_leave_class
         'html' => [], //含網頁語法的欄位（所見即所得的內容）
         'text' => [], //純大量文字欄位
         'json' => [], //內容為 json 格式的欄位
-        'pass' => ['files'], //不予過濾的欄位
+        'pass' => ['files', 'subject'], //不予過濾的欄位（subject 為 JSON 格式，由 display_class 自行處理）
         'explode' => [],   //用分號隔開的欄位
     ];
 
-    //逐節班級＋科目一律打包成 JSON 存入 subject 欄位（中文不跳脱，級任科任統一格式）；兩者皆空則存空字串（日薪列無科目）
-    public static function encode_subject($grade_class = '', $subject = '')
+    // ponytail: 遺課處理方式（委託代課／自己補課／與他人調課）與異動後課程，一律收進既有的 subject JSON，
+    // 不新增資料表欄位。handle 省略即為舊行為「委託代課」，舊資料零遷移。
+    // 需要跨假單雙向記錄（對方老師名下也生一筆）時才需另立資料表。
+    public static $handle_keys = ['handle', 'swap_date', 'swap_period', 'swap_subject'];
+
+    //處理方式顯示文字
+    public static function handle_text($handle = 'substitute')
     {
-        $grade_class = trim((string) $grade_class);
-        $subject = trim((string) $subject);
-        if ($grade_class === '' && $subject === '') {
-            return '';
-        }
-        return json_encode(['grade_class' => $grade_class, 'subject' => $subject], JSON_UNESCAPED_UNICODE);
+        return match ((string) $handle) {
+            'makeup' => _MD_JILLLEAVE_HANDLE_MAKEUP,
+            'swap' => _MD_JILLLEAVE_HANDLE_SWAP,
+            default => _MD_JILLLEAVE_HANDLE_SUBSTITUTE,
+        };
     }
 
-    //把 subject 欄位解回 grade_class + subject（相容舊資料／級任的純文字）
+    //逐節班級＋科目一律打包成 JSON 存入 subject 欄位（中文不跳脱，級任科任統一格式）；兩者皆空則存空字串（日薪列無科目）
+    public static function encode_subject($grade_class = '', $subject = '', $extra = [])
+    {
+        $data = [
+            'grade_class' => trim((string) $grade_class),
+            'subject' => trim((string) $subject),
+        ];
+
+        //僅寫入非預設值，代課列的 JSON 與舊資料格式完全相同
+        foreach (self::$handle_keys as $key) {
+            $value = trim((string) ($extra[$key] ?? ''));
+            if ($value !== '' && !($key === 'handle' && $value === 'substitute')) {
+                $data[$key] = $value;
+            }
+        }
+
+        if ($data['grade_class'] === '' && $data['subject'] === '' && count($data) === 2) {
+            return '';
+        }
+        return json_encode($data, JSON_UNESCAPED_UNICODE);
+    }
+
+    //把 subject 欄位解回 grade_class + subject + 處理方式（相容舊資料／級任的純文字）
     public static function decode_subject($raw = '')
     {
         $raw = (string) $raw;
+        $default = [
+            'grade_class' => '',
+            'subject' => '',
+            'handle' => 'substitute',
+            'swap_date' => '',
+            'swap_period' => '',
+            'swap_subject' => '',
+        ];
         if (isset($raw[0]) && $raw[0] === '{') {
             $data = json_decode($raw, true);
             if (is_array($data) && array_key_exists('subject', $data)) {
-                return [
-                    'grade_class' => (string) ($data['grade_class'] ?? ''),
-                    'subject' => (string) ($data['subject'] ?? ''),
-                ];
+                return array_map('strval', array_merge($default, array_intersect_key($data, $default)));
             }
         }
-        return ['grade_class' => '', 'subject' => $raw];
+        return array_merge($default, ['subject' => $raw]);
     }
 
     //把一列原始節次資料整理成顯示用（解析 subject、套 htmlspecialchars），供 show／總覽／Excel 共用
@@ -50,6 +81,12 @@ class Jill_leave_class
         $decoded = self::decode_subject($class['subject'] ?? '');
         $class['grade_class'] = $myts->htmlSpecialChars($decoded['grade_class']);
         $class['subject'] = $myts->htmlSpecialChars($decoded['subject']);
+        //處理方式與異動後課程（代課列 handle 為 substitute，swap_* 為空字串）
+        $class['handle'] = $decoded['handle'];
+        $class['handle_text'] = self::handle_text($decoded['handle']);
+        foreach (['swap_date', 'swap_period', 'swap_subject'] as $key) {
+            $class[$key] = $myts->htmlSpecialChars($decoded[$key]);
+        }
         $class['class_period'] = $myts->htmlSpecialChars((string) ($class['class_period'] ?? ''));
         $class['substitute_teacher'] = $myts->htmlSpecialChars((string) ($class['substitute_teacher'] ?? ''));
         $class['class_sn'] = (int) ($class['class_sn'] ?? 0);

@@ -55,12 +55,18 @@
         $card.find('.daily-panel .teacher-opt').attr('name', 'ui_teacher_d' + seq);
 
         var $hour_panel = $card.find('.hour-panel');
+        var $swap_panel = $card.find('.swap-panel');
         $.each(cfg.periods || [], function (i, p) {
             var $row = $($.trim($('#period_row_tpl').html()));
             $row.attr('data-period', p);
             $row.find('.period-text').text(p);
-            $row.find('.teacher-opt').attr('name', 'ui_teacher_' + seq + '_' + i);
+            $row.find('.teacher-opt').attr('name', 'ui_teacher_h_' + seq + '_' + i);
             $hour_panel.append($row);
+
+            var $srow = $($.trim($('#swap_period_row_tpl').html()));
+            $srow.attr('data-period', p);
+            $srow.find('.period-text').text(p);
+            $swap_panel.append($srow);
         });
         return $card;
     }
@@ -94,22 +100,24 @@
             $target_daily.find('.teacher-input').val($first_daily.find('.teacher-input').val());
             sync_row($target_daily, true);
         } else {
-            // 鐘點：先從第一天取得預設代課老師與科目（取第一個已勾選節次）
-            var $first_checked = $first_card.find('.period-row .period-check:checked').first().closest('.period-row');
+            var panel_class = first_type === 'swap' ? '.swap-panel' : '.hour-panel';
+            var $first_checked = $first_card.find(panel_class + ' .period-row .period-check:checked').first().closest('.period-row');
             var default_teacher_mode = 'assign';
             var default_teacher_name = '';
             var default_subject = '';
+            var default_handle = 'substitute';
             if ($first_checked.length) {
                 default_teacher_mode = $first_checked.find('.teacher-opt:checked').val() || 'assign';
                 default_teacher_name = $first_checked.find('.teacher-input').val() || '';
                 default_subject = $.trim($first_checked.find('.subject-input').val());
+                default_handle = $first_checked.find('.handle-select').val() || (first_type === 'swap' ? 'swap' : 'substitute');
             }
 
             // 同節次只增加勾選，不取消目標已勾的節次
-            $first_card.find('.period-row').each(function () {
+            $first_card.find(panel_class + ' .period-row').each(function () {
                 var $src = $(this);
                 var period = $src.attr('data-period');
-                var $dst = $target_card.find('.period-row[data-period="' + period + '"]');
+                var $dst = $target_card.find(panel_class + ' .period-row[data-period="' + period + '"]');
                 if (!$dst.length) { return; }
 
                 if ($src.find('.period-check').is(':checked')) {
@@ -118,8 +126,8 @@
                 sync_row($dst, $dst.find('.period-check').is(':checked'));
             });
 
-            // 所有已勾選的節次統一套用第一天的科目與代課老師
-            $target_card.find('.period-row').each(function () {
+            // 所有已勾選的節次統一套用第一天的內容
+            $target_card.find(panel_class + ' .period-row').each(function () {
                 var $row = $(this);
                 if (!$row.find('.period-check').is(':checked')) { return; }
                 if (default_subject !== '') {
@@ -127,6 +135,7 @@
                 }
                 $row.find('.teacher-opt[value="' + default_teacher_mode + '"]').prop('checked', true);
                 $row.find('.teacher-input').val(default_teacher_name);
+                $row.find('.handle-select').val(default_handle);
                 sync_row($row, true);
             });
         }
@@ -139,11 +148,31 @@
 
     // 依勾選狀態啟用／停用某範圍（節次列或日薪區）的欄位
     function sync_row($scope, enabled) {
-        $scope.find('.subject-input, .teacher-opt').prop('disabled', !enabled);
+        $scope.find('.subject-input, .teacher-opt, .handle-select').prop('disabled', !enabled);
         // 逐節班級欄位僅科任且該節勾選時開放
         $scope.find('.gc-grade, .gc-class').prop('disabled', !enabled || is_advisor());
         var use_input = $scope.find('.teacher-opt[value="input"]').is(':checked');
         $scope.find('.teacher-input').prop('disabled', !enabled || !use_input);
+        if ($scope.hasClass('period-row')) {
+            apply_handle($scope);
+        }
+    }
+
+    // 依遺課處理方式切換欄位：
+    // 委託代課→代課老師；自己補課→僅異動後日期節次；與他人調課→異動後＋對調科目＋對調教師
+    function apply_handle($row) {
+        var handle = $row.find('.handle-select').val() || 'substitute';
+        var checked = $row.find('.period-check').is(':checked');
+        $row.find('.changed-wrap').toggleClass('d-none', handle === 'substitute');
+        $row.find('.swap-subject-wrap').toggleClass('d-none', handle !== 'swap');
+        // 調課／補課無「教學組派代」概念，直接填對方姓名
+        $row.find('.teacher-opt-wrap').toggleClass('d-none', handle !== 'substitute');
+        $row.find('.teacher-name-wrap').toggleClass('d-none', handle === 'makeup');
+        $row.find('.teacher-input').attr('placeholder', handle === 'swap' ? cfg.swap_teacher_text : cfg.teacher_text);
+        $row.find('.changed-date, .changed-period, .swap-subject-input').prop('disabled', !checked || handle === 'substitute');
+        if (handle === 'swap') {
+            $row.find('.teacher-input').prop('disabled', !checked);
+        }
     }
 
     // 依級／科任切換：隱藏或顯示所有節次列的班級欄位，並重算啟用狀態
@@ -175,13 +204,22 @@
             set_teacher($panel, first.substitute_teacher);
             sync_row($panel, true);
         } else {
+            var panel_class = first.type === 'swap' ? '.swap-panel' : '.hour-panel';
             $.each(rows, function (i, row) {
-                var $row = $card.find('.period-row[data-period="' + row.class_period + '"]');
+                var $row = $card.find(panel_class + ' .period-row[data-period="' + row.class_period + '"]');
                 if (!$row.length) {
                     return; // 找不到匹配的節次則略過
                 }
                 $row.find('.period-check').prop('checked', true);
                 $row.find('.subject-input').val(row.subject);
+                // 處理方式與異動後課程
+                $row.find('.handle-select').val(row.handle || (first.type === 'swap' ? 'swap' : 'substitute'));
+                $row.find('.changed-date').val(row.swap_date || '');
+                $row.find('.changed-period').val(row.swap_period || '');
+                $row.find('.swap-subject-input').val(row.swap_subject || '');
+                if (row.handle === 'swap') {
+                    $row.find('.teacher-input').val(row.substitute_teacher || '');
+                }
                 // 科任逐節班級：把「N年M班」拆回年級下拉與班級文字框
                 var gc = /^(\d+)年(.+)班$/.exec(row.grade_class || '');
                 if (gc) {
@@ -278,10 +316,11 @@
                     error = date_label(date) + '：' + cfg.msg.no_teacher;
                     return false;
                 }
-                rows.push({ period: cfg.allday_text, subject: '', grade_class: '', teacher: teacher });
+                rows.push({ period: cfg.allday_text, subject: '', grade_class: '', teacher: teacher, handle: 'substitute' });
             } else {
+                var panel_class = type === 'swap' ? '.swap-panel' : '.hour-panel';
                 var advisor = is_advisor();
-                $card.find('.period-row').each(function () {
+                $card.find(panel_class + ' .period-row').each(function () {
                     var $row = $(this);
                     if (!$row.find('.period-check').is(':checked')) {
                         return;
@@ -303,12 +342,33 @@
                         error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_subject;
                         return false;
                     }
-                    var teacher = get_teacher($row);
-                    if (teacher === false) {
-                        error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_teacher;
-                        return false;
+                    // 遺課處理方式：代課要代課老師；補課／調課要異動後日期與節次，調課另需對調教師
+                    var handle = $row.find('.handle-select').val() || (type === 'swap' ? 'swap' : 'substitute');
+                    var changed = { date: '', period: '', subject: '' };
+                    var teacher = '';
+                    if (handle === 'substitute') {
+                        teacher = get_teacher($row);
+                        if (teacher === false) {
+                            error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_teacher;
+                            return false;
+                        }
+                    } else {
+                        changed.date = $.trim($row.find('.changed-date').val() || '');
+                        changed.period = $row.find('.changed-period').val() || '';
+                        changed.subject = $.trim($row.find('.swap-subject-input').val() || '');
+                        if (changed.date === '' || changed.period === '') {
+                            error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_changed;
+                            return false;
+                        }
+                        if (handle === 'swap') {
+                            teacher = $.trim($row.find('.teacher-input').val() || '');
+                            if (teacher === '') {
+                                error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_swap_teacher;
+                                return false;
+                            }
+                        }
                     }
-                    rows.push({ period: $row.attr('data-period'), subject: subject, grade_class: grade_class, teacher: teacher });
+                    rows.push({ period: period_text, subject: subject, grade_class: grade_class, teacher: teacher, handle: handle, changed: changed });
                 });
                 if (!error && rows.length === 0) {
                     error = date_label(date) + '：' + cfg.msg.no_period;
@@ -327,6 +387,10 @@
                 add_hidden($box, 'substitute_teacher[]', row.teacher);
                 add_hidden($box, 'pay[]', pay);
                 add_hidden($box, 'type[]', type);
+                add_hidden($box, 'handle[]', row.handle || 'substitute');
+                add_hidden($box, 'swap_date[]', (row.changed || {}).date || '');
+                add_hidden($box, 'swap_period[]', (row.changed || {}).period || '');
+                add_hidden($box, 'swap_subject[]', (row.changed || {}).subject || '');
             });
         });
 
@@ -339,17 +403,23 @@
     }
 
     function bind_events() {
-        // 日薪／鐘點切換
+        // 調代課類型切換 (daily / hour / swap)
         $container.on('change', '.type-radio', function () {
-            var is_daily = $(this).val() === 'daily';
+            var val = $(this).val();
             var $card = $(this).closest('.substitute-card');
-            $card.find('.daily-panel').toggleClass('d-none', !is_daily);
-            $card.find('.hour-panel').toggleClass('d-none', is_daily);
+            $card.find('.daily-panel').toggleClass('d-none', val !== 'daily');
+            $card.find('.hour-panel').toggleClass('d-none', val !== 'hour');
+            $card.find('.swap-panel').toggleClass('d-none', val !== 'swap');
         });
 
         // 勾選節次才開放該列欄位
         $container.on('change', '.period-check', function () {
             sync_row($(this).closest('.period-row'), this.checked);
+        });
+
+        // 遺課處理方式切換（代課／補課／調課）
+        $container.on('change', '.handle-select', function () {
+            apply_handle($(this).closest('.period-row'));
         });
 
         // 教學組派代／自行覓代切換

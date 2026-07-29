@@ -103,6 +103,13 @@
                                                         <div>
                                                             <span class="badge bg-secondary me-2"><{$class.class_period}></span>
                                                             <span class="fw-bold"><{if $class.grade_class}><{$class.grade_class}> <{/if}><{$class.subject}></span>
+                                                            <{if $class.handle != 'substitute'}>
+                                                                <!--補課／調課：標示處理方式與異動後課程-->
+                                                                <span class="badge <{if $class.handle == 'swap'}>bg-primary<{else}>bg-warning text-dark<{/if}> ms-1"><{$class.handle_text}></span>
+                                                                <div class="text-muted">
+                                                                    <i class="fa fa-arrow-right me-1"></i><{$class.swap_date}> <{$class.swap_period}><{if $class.swap_subject}>（<{$class.swap_subject}>）<{/if}>
+                                                                </div>
+                                                            <{/if}>
                                                         </div>
                                                         <div class="text-success fw-bold">
                                                             <i class="fa fa-user me-1"></i><{$class.substitute_teacher}>

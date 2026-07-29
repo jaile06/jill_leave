@@ -33,7 +33,7 @@ CREATE TABLE `jill_leave_class` (
   `substitute_sn` mediumint(8) unsigned NOT NULL COMMENT '關聯代課編號',
   `sn` mediumint(8) unsigned NOT NULL COMMENT '關聯請假編號',
   `class_period` varchar(20) NOT NULL COMMENT '節次 (例如: 1, 2, 早自習)',
-  `subject` varchar(100) NOT NULL COMMENT '科目',
+  `subject` text NOT NULL COMMENT '科目（JSON 格式：含班級、科目、處理方式等）',
   `substitute_teacher` varchar(50) NOT NULL COMMENT '代課老師',
   PRIMARY KEY (`class_sn`),
   KEY `idx_substitute_sn` (`substitute_sn`),
@@ -45,7 +45,7 @@ CREATE TABLE `jill_leave_substitute` (
   `sn` mediumint(8) unsigned NOT NULL COMMENT '關聯請假編號',
   `substitute_date` date NOT NULL COMMENT '代課日期',
   `pay` enum('self','school') NOT NULL DEFAULT 'self' COMMENT '支付方式 (self:自費 school:公費)',
-  `type` enum('daily','hour') NOT NULL DEFAULT 'daily' COMMENT '代課類型 (daily:日薪 hour:鐘點)',
+  `type` enum('daily','hour','swap') NOT NULL DEFAULT 'daily' COMMENT '代課類型 (daily:日薪 hour:鐘點 swap:補調課)',
   PRIMARY KEY (`substitute_sn`),
   KEY `idx_sn` (`sn`),
   KEY `idx_date` (`substitute_date`)

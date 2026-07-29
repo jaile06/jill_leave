@@ -13,15 +13,14 @@
         </div>
 
         <!--假別排序-->
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="form-floating mb-3">
                 <input type="text" name="cate_sort" id="cate_sort" class="form-control " value="<{$cate_sort}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CATE_CATE_SORT}>">
                 <label for="cate_sort"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_SORT}></label>
             </div>
         </div>
 
-    <!--啟用狀態-->
-    <div class="row">
+        <!--啟用狀態-->
         <div class="col-md-2">
             <{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>
         </div>
@@ -35,7 +34,6 @@
                 <label class="form-check-label" for="enable_0">停用</label>
             </div>
         </div>
-    </div>
     </div>
 
     <div class="bar text-center">

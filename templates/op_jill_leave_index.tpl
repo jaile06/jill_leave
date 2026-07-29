@@ -108,7 +108,6 @@
         <{/if}>
     </div>
 <{/if}>
-</div>
 
 <{if $smarty.session.jill_leave_adm|default:false}>
 <script>
