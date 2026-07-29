@@ -45,7 +45,8 @@ $substitutes = Jill_leave_substitute::get_all_by_leave($sn, false);
 // 展開為逐列陣列，方便後續迭代
 $rows = [];
 foreach ($substitutes as $sub) {
-    $pay_text  = ($sub['pay'] == 'school') ? '公費' : '自費';
+    //補調課不涉及代課鐘點費，支付方式顯示「無」
+    $pay_text  = ($sub['type'] === 'swap') ? '無' : (($sub['pay'] == 'school') ? '公費' : '自費');
     $type_text = match ($sub['type']) { 'hour' => '鐘點', 'swap' => '補調課', default => '日薪' };
     if (!empty($sub['classes'])) {
         foreach ($sub['classes'] as $cls) {

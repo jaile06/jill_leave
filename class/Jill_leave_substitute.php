@@ -112,7 +112,8 @@ class Jill_leave_substitute
         $classes = Jill_leave_class::get_all(['sn' => $sn], [], [], ['class_sn' => 'ASC'], false, '', '');
         foreach ($substitutes as $substitute_sn => $substitute) {
             $substitutes[$substitute_sn]['classes'] = [];
-            $substitutes[$substitute_sn]['pay_text'] = ($substitute['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF;
+            //補調課不涉及代課鐘點費，支付方式顯示「無」
+            $substitutes[$substitute_sn]['pay_text'] = ($substitute['type'] === 'swap') ? _MD_JILLLEAVE_PAY_NONE : (($substitute['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF);
             $substitutes[$substitute_sn]['type_text'] = match ($substitute['type']) { 'hour' => _MD_JILLLEAVE_TYPE_HOUR, 'swap' => _MD_JILLLEAVE_TYPE_SWAP, default => _MD_JILLLEAVE_TYPE_DAILY };
         }
         foreach ($classes as $class) {
@@ -189,7 +190,8 @@ class Jill_leave_substitute
         while ($data = $xoopsDB->fetchArray($result)) {
             $data = Tools::filter_all_data('read', $data, self::$filter_arr);
             $data['status_text'] = Jill_leave::status_text($data['status']);
-            $data['pay_text'] = ($data['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF;
+            //補調課不涉及代課鐘點費，支付方式顯示「無」
+            $data['pay_text'] = ($data['type'] === 'swap') ? _MD_JILLLEAVE_PAY_NONE : (($data['pay'] == 'school') ? _MD_JILLLEAVE_PAY_SCHOOL : _MD_JILLLEAVE_PAY_SELF);
             $data['type_text'] = match ($data['type']) { 'hour' => _MD_JILLLEAVE_TYPE_HOUR, 'swap' => _MD_JILLLEAVE_TYPE_SWAP, default => _MD_JILLLEAVE_TYPE_DAILY };
             $data['classes'] = [];
             $data_arr[$data['substitute_sn']] = $data;

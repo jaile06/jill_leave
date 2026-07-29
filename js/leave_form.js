@@ -440,6 +440,8 @@
             $card.find('.daily-panel').toggleClass('d-none', val !== 'daily');
             $card.find('.hour-panel').toggleClass('d-none', val !== 'hour');
             $card.find('.swap-panel').toggleClass('d-none', val !== 'swap');
+            // 補調課不涉及代課鐘點費，隱藏支付方式
+            $card.find('.pay-method-wrap').toggleClass('d-none', val === 'swap');
         });
 
         // 勾選節次才開放該列欄位

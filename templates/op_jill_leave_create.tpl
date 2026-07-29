@@ -136,8 +136,8 @@
     <div class="card mb-3 substitute-card">
         <div class="card-header d-flex flex-wrap align-items-center gap-3">
             <strong class="me-auto"><i class="fa fa-calendar"></i> <span class="substitute-date-text"></span></strong>
-            <!--支付方式-->
-            <div class="d-inline-flex align-items-center">
+            <!--支付方式（補調課不涉及代課鐘點費，不顯示此欄）-->
+            <div class="d-inline-flex align-items-center pay-method-wrap">
                 <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></span>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="self" checked> <{$smarty.const._MD_JILLLEAVE_PAY_SELF_FULL}></label>

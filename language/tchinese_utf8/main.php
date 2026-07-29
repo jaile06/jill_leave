@@ -45,6 +45,7 @@ define('_MD_JILLLEAVE_STATUS_1', '已通過');
 define('_MD_JILLLEAVE_STATUS_2', '駁回');
 define('_MD_JILLLEAVE_PAY_SELF', '自費');
 define('_MD_JILLLEAVE_PAY_SCHOOL', '公費');
+define('_MD_JILLLEAVE_PAY_NONE', '無');
 define('_MD_JILLLEAVE_TYPE_DAILY', '日薪');
 define('_MD_JILLLEAVE_TYPE_HOUR', '鐘點');
 define('_MD_JILLLEAVE_TYPE_SWAP', '補調課');
