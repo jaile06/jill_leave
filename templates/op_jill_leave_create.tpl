@@ -322,7 +322,9 @@ var LEAVE_FORM = {
         no_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_TEACHER}>',
         no_grade_class: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_GRADE_CLASS}>',
         no_changed: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_CHANGED}>',
-        no_swap_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_TEACHER}>'
+        no_swap_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_TEACHER}>',
+        no_swap_subject: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_SUBJECT}>',
+        conflict_period: '<{$smarty.const._MD_JILLLEAVE_MSG_CONFLICT_PERIOD}>'
     },
     teacher_text: '<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>',
     swap_teacher_text: '<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>',

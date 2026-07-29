@@ -34,9 +34,7 @@ switch ($op) {
         Tools::set_module_config('class_room', (string) Request::getInt('class_room'));
         Tools::set_module_config('class_period', $class_period);
 
-        //更新管理員 session
-        unset($_SESSION['jill_leave_adm']);
-        Tools::get_session();
+        //管理員權限已改為每次請求重算，設定變更立即生效（見 Tools::get_session()）
 
         header("location: {$_SERVER['PHP_SELF']}");
         exit;

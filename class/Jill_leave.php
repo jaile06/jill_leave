@@ -133,6 +133,9 @@ class Jill_leave
             return false;
         }
 
+        //僅管理者或本人可檢視本筆資料
+        Tools::chk_own($all['uid']);
+
         //將 uid 編號轉換成使用者姓名（或帳號）
         $all['uid_name'] = Utility::get_name_by_uid($all['uid']);
         $xoopsTpl->assign('uid_name', $all['uid_name']);
@@ -290,6 +293,21 @@ class Jill_leave
         Utility::token_form();
     }
 
+    //檢查日期格式（YYYY-MM-DD 且為合法日期）與起訖順序，不合法則導轉並中止
+    private static function chk_date_range($start_date, $end_date, $redirect_url)
+    {
+        $valid = static function ($date) {
+            if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+                return false;
+            }
+            return checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+        };
+
+        if (!$valid($start_date) || !$valid($end_date) || $start_date > $end_date) {
+            redirect_header($redirect_url, 3, _MD_JILLLEAVE_MSG_DATE_ORDER);
+        }
+    }
+
     //新增資料到 jill_leave Jill_leave::store()
     public static function store()
     {
@@ -311,6 +329,7 @@ class Jill_leave
         $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
+        self::chk_date_range($start_date, $end_date, XOOPS_URL . '/modules/jill_leave/index.php');
 
         //一般使用者僅能建立自己的假單且狀態固定為待審核，管理者可指定狀態
         $uid = ($xoopsUser) ? $xoopsUser->uid() : 0;
@@ -415,6 +434,7 @@ class Jill_leave
         $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
+        self::chk_date_range($start_date, $end_date, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . (int) ($where_arr['sn'] ?? 0));
 
         //更新時檢查日期重疊（排除自身 sn）
         $self_sn = (int) ($where_arr['sn'] ?? 0);
@@ -445,10 +465,13 @@ class Jill_leave
         WHERE 1 $and";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
 
-        //重建代課資料（先刪後建）
+        //重建代課資料（先刪後建）；MyISAM 不支援 Transaction，寫入失敗時還原刪除前的備份，避免資料遺失
         $sn = (int) ($where_arr['sn'] ?? 0);
+        $backup = self::backup_substitutes($sn);
         self::destroy_related($sn);
         if (!self::save_substitutes($sn)) {
+            self::destroy_related($sn);
+            self::restore_substitutes($backup);
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $sn, 3, _MD_JILLLEAVE_SUBSTITUTE_SAVE_FAIL);
         }
 
@@ -545,6 +568,65 @@ class Jill_leave
 
         $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave_class") . "` WHERE `sn` = '{$sn}'";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
+    }
+
+    //取出某假單目前的代課與節次原始資料，供 update() 在重建失敗時還原用
+    private static function backup_substitutes($sn = 0)
+    {
+        global $xoopsDB;
+
+        $sn = (int) $sn;
+        $backup = ['substitutes' => [], 'classes' => []];
+        if (empty($sn)) {
+            return $backup;
+        }
+
+        $sql = "SELECT * FROM `" . $xoopsDB->prefix("jill_leave_substitute") . "` WHERE `sn` = '{$sn}'";
+        $result = $xoopsDB->query($sql) or Utility::web_error($sql);
+        while ($row = $xoopsDB->fetchArray($result)) {
+            $backup['substitutes'][] = $row;
+        }
+
+        $sql = "SELECT * FROM `" . $xoopsDB->prefix("jill_leave_class") . "` WHERE `sn` = '{$sn}'";
+        $result = $xoopsDB->query($sql) or Utility::web_error($sql);
+        while ($row = $xoopsDB->fetchArray($result)) {
+            $backup['classes'][] = $row;
+        }
+
+        return $backup;
+    }
+
+    //還原 backup_substitutes() 取出的代課與節次資料（保留原本流水號，維持節次與代課紀錄的關聯）
+    private static function restore_substitutes($backup)
+    {
+        global $xoopsDB;
+
+        foreach ($backup['substitutes'] as $row) {
+            $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_substitute") . "` (
+                `substitute_sn`, `sn`, `substitute_date`, `pay`, `type`
+            ) VALUES (
+                '" . (int) $row['substitute_sn'] . "',
+                '" . (int) $row['sn'] . "',
+                '" . $xoopsDB->escape($row['substitute_date']) . "',
+                '" . $xoopsDB->escape($row['pay']) . "',
+                '" . $xoopsDB->escape($row['type']) . "'
+            )";
+            $xoopsDB->queryF($sql) or Utility::web_error($sql);
+        }
+
+        foreach ($backup['classes'] as $row) {
+            $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_class") . "` (
+                `class_sn`, `substitute_sn`, `sn`, `class_period`, `subject`, `substitute_teacher`
+            ) VALUES (
+                '" . (int) $row['class_sn'] . "',
+                '" . (int) $row['substitute_sn'] . "',
+                '" . (int) $row['sn'] . "',
+                '" . $xoopsDB->escape($row['class_period']) . "',
+                '" . $xoopsDB->escape($row['subject']) . "',
+                '" . $xoopsDB->escape($row['substitute_teacher']) . "'
+            )";
+            $xoopsDB->queryF($sql) or Utility::web_error($sql);
+        }
     }
 
     //刪除 jill_leave 某筆資料資料 Jill_leave::destroy()（連帶刪除代課與節次資料）

@@ -169,16 +169,15 @@ class Tools
         global $xoopsUser;
 
         //判斷是否對該模組有管理權限（XOOPS管理員 或 Email 列於管理人員設定中）
-        if (!isset($_SESSION['jill_leave_adm'])) {
-            $is_adm = isset($xoopsUser) && \is_object($xoopsUser) ? $xoopsUser->isAdmin() : false;
+        //ponytail: 每次請求重算，不快取在 session，避免管理員把人移出 adm_email 後對方仍持有權限
+        $is_adm = isset($xoopsUser) && \is_object($xoopsUser) ? $xoopsUser->isAdmin() : false;
 
-            if (!$is_adm && isset($xoopsUser) && \is_object($xoopsUser)) {
-                $adm_emails = self::get_admin_email('array');
-                $is_adm     = !empty($adm_emails) && in_array($xoopsUser->email(), $adm_emails, true);
-            }
-
-            $_SESSION['jill_leave_adm'] = $is_adm;
+        if (!$is_adm && isset($xoopsUser) && \is_object($xoopsUser)) {
+            $adm_emails = self::get_admin_email('array');
+            $is_adm     = !empty($adm_emails) && in_array($xoopsUser->email(), $adm_emails, true);
         }
+
+        $_SESSION['jill_leave_adm'] = $is_adm;
 
         if (!isset($_SESSION['now_user'])) {
             $_SESSION['now_user'] = ($xoopsUser) ? $xoopsUser->toArray() : [];

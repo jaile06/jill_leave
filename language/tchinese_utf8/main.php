@@ -79,6 +79,8 @@ define('_MD_JILLLEAVE_SWAP_SUBJECT', '對調科目');
 define('_MD_JILLLEAVE_SWAP_TEACHER', '對調教師');
 define('_MD_JILLLEAVE_MSG_NO_CHANGED', '請選擇異動後日期與節次');
 define('_MD_JILLLEAVE_MSG_NO_SWAP_TEACHER', '請輸入對調教師');
+define('_MD_JILLLEAVE_MSG_NO_SWAP_SUBJECT', '請輸入對調科目');
+define('_MD_JILLLEAVE_MSG_CONFLICT_PERIOD', '{date} 第 {period} 節已重複（衝堂），請重新選擇異動後節次');
 
 //核章欄（僅列印用，不寫入資料庫）
 define('_MD_JILLLEAVE_SIGN_TEACHER', '請假教師');

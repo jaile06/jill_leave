@@ -356,11 +356,18 @@
                         changed.date = $.trim($row.find('.changed-date').val() || '');
                         changed.period = $row.find('.changed-period').val() || '';
                         changed.subject = $.trim($row.find('.swap-subject-input').val() || '');
+                        // 對調／補課：異動後日期與節次必填
                         if (changed.date === '' || changed.period === '') {
                             error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_changed;
                             return false;
                         }
                         if (handle === 'swap') {
+                            // 對調科目必填
+                            if (changed.subject === '') {
+                                error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_swap_subject;
+                                return false;
+                            }
+                            // 對調老師必填
                             teacher = $.trim($row.find('.teacher-input').val() || '');
                             if (teacher === '') {
                                 error = date_label(date) + ' ' + period_text + '：' + cfg.msg.no_swap_teacher;
@@ -399,6 +406,29 @@
             alert(error);
             return false;
         }
+
+        // 跨卡片衝堂檢查：對調/補課的「異動後日期＋節次」不得重複
+        var seen_periods = {};
+        var conflict_msg = '';
+        $box.find('input[name="swap_date[]"]').each(function (i) {
+            var sw_date = $(this).val();
+            var sw_period = $box.find('input[name="swap_period[]"]').eq(i).val();
+            if (!sw_date || !sw_period) { return; }
+            var key = sw_date + '|' + sw_period;
+            if (seen_periods[key]) {
+                conflict_msg = cfg.msg.conflict_period
+                    .replace('{date}', sw_date)
+                    .replace('{period}', sw_period);
+                return false; // break each
+            }
+            seen_periods[key] = true;
+        });
+        if (conflict_msg) {
+            $box.empty();
+            alert(conflict_msg);
+            return false;
+        }
+
         return true;
     }
 
