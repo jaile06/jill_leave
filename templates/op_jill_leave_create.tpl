@@ -310,7 +310,7 @@
 // 語系文字與既有資料設定，供 js/leave_form.js 使用
 var LEAVE_FORM = {
     weekdays: '<{$smarty.const._MD_JILLLEAVE_WEEKDAYS}>'.split(','),
-    periods: <{$class_period_options|@json_encode nofilter}>,
+    periods: <{$class_period_options|@json_encode:15 nofilter}>,
     allday_text: '<{$smarty.const._MD_JILLLEAVE_ALLDAY}>',
     assign_text: '<{$smarty.const._MD_JILLLEAVE_TEACHER_ASSIGN}>',
     start_date: '<{$start_date}>',
@@ -330,7 +330,7 @@ var LEAVE_FORM = {
     swap_teacher_text: '<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>',
     copy_first_day: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>',
     copy_first_day_tip: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>',
-    existing: <{$substitute_rows|@json_encode nofilter}>
+    existing: <{$substitute_rows|@json_encode:15 nofilter}>
 };
 </script>
 <script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$smarty.now}>"></script>

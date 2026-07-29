@@ -505,6 +505,16 @@ class Jill_leave
             return true; //沒有代課資料視為成功
         }
 
+        //單次請求最多處理筆數，避免惡意送出超大陣列造成大量 INSERT（DoS）
+        $substitute_dates = array_slice($_POST['substitute_date'], 0, 500);
+
+        //平行陣列若非陣列（例如被竄改成字串），一律視為空陣列，避免用字串索引取到單一字元寫入垃圾資料
+        $parallel_keys = ['class_period', 'substitute_teacher', 'pay', 'type', 'subject', 'class_grade_class', 'handle', 'swap_date', 'swap_period', 'swap_subject'];
+        $post = [];
+        foreach ($parallel_keys as $key) {
+            $post[$key] = is_array($_POST[$key] ?? null) ? $_POST[$key] : [];
+        }
+
         //同一代課日期共用一筆 jill_leave_substitute
         $substitute_sn_arr = [];
 
@@ -516,29 +526,29 @@ class Jill_leave
         $start_date = trim((string) ($_POST['start_date'] ?? ''));
         $end_date = trim((string) ($_POST['end_date'] ?? ''));
 
-        foreach ($_POST['substitute_date'] as $i => $date) {
+        foreach ($substitute_dates as $i => $date) {
             $date = $xoopsDB->escape(trim($date));
             if ($start_date !== '' && $end_date !== '' && ($date < $start_date || $date > $end_date)) {
                 continue;
             }
-            $class_period = Tools::filter('class_period', $_POST['class_period'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
-            $substitute_teacher = Tools::filter('substitute_teacher', $_POST['substitute_teacher'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
-            $pay = in_array($_POST['pay'][$i] ?? '', ['self', 'school'], true) ? $_POST['pay'][$i] : 'self';
-            $type = in_array($_POST['type'][$i] ?? '', ['daily', 'hour', 'swap'], true) ? $_POST['type'][$i] : 'daily';
+            $class_period = Tools::filter('class_period', $post['class_period'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
+            $substitute_teacher = Tools::filter('substitute_teacher', $post['substitute_teacher'][$i] ?? '', 'write', Jill_leave_class::$filter_arr);
+            $pay = in_array($post['pay'][$i] ?? '', ['self', 'school'], true) ? $post['pay'][$i] : 'self';
+            $type = in_array($post['type'][$i] ?? '', ['daily', 'hour', 'swap'], true) ? $post['type'][$i] : 'daily';
 
             //逐節班級＋科目一律合併為 JSON 存入 subject 欄位（級任沿用導師班級）
-            $subject_raw = trim((string) ($_POST['subject'][$i] ?? ''));
-            $grade_class_period = trim((string) ($_POST['class_grade_class'][$i] ?? ''));
+            $subject_raw = trim((string) ($post['subject'][$i] ?? ''));
+            $grade_class_period = trim((string) ($post['class_grade_class'][$i] ?? ''));
             if ($type === 'hour' && $grade_class_period === '' && $is_advisor) {
                 $grade_class_period = $main_grade_class;
             }
             //遺課處理方式與異動後課程，一併打包進 subject JSON（不動資料表結構）
-            $handle = in_array($_POST['handle'][$i] ?? '', ['substitute', 'makeup', 'swap'], true) ? $_POST['handle'][$i] : 'substitute';
+            $handle = in_array($post['handle'][$i] ?? '', ['substitute', 'makeup', 'swap'], true) ? $post['handle'][$i] : 'substitute';
             $extra = ['handle' => $handle];
             if ($handle !== 'substitute') {
                 //與 subject 同樣取原始值，整包 JSON 最後才 escape（讀取時由 display_class 過濾）
                 foreach (['swap_date', 'swap_period', 'swap_subject'] as $key) {
-                    $extra[$key] = trim((string) ($_POST[$key][$i] ?? ''));
+                    $extra[$key] = trim((string) ($post[$key][$i] ?? ''));
                 }
             }
             $subject = $xoopsDB->escape(Jill_leave_class::encode_subject($grade_class_period, $subject_raw, $extra));

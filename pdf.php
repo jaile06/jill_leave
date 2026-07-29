@@ -24,7 +24,9 @@ if (empty($sn)) {
     exit;
 }
 
-$jill_leave = Jill_leave::get(['sn' => $sn]);
+// filter='' 取原始未轉義字串：PDF 走 TCPDF Cell() 純文字輸出，非 HTML 渲染，
+// 若用預設 htmlSpecialChars 過的資料，含 & ' 等符號的姓名會顯示成 &amp; 字面值
+$jill_leave = Jill_leave::get(['sn' => $sn], [], '');
 if (empty($jill_leave)) {
     redirect_header($_SERVER['HTTP_REFERER'], 3, "無此請假資料");
     exit;
@@ -32,11 +34,11 @@ if (empty($jill_leave)) {
 
 Tools::chk_own($jill_leave['uid']);
 
-$jill_leave_cate = Jill_leave_cate::get(['cate_sn' => $jill_leave['cate_sn']]);
+$jill_leave_cate = Jill_leave_cate::get(['cate_sn' => $jill_leave['cate_sn']], [], '');
 $cate_title = $jill_leave_cate['cate_title'] ?? '';
 
-// 取得代課明細（已含 display_class 解析）
-$substitutes = Jill_leave_substitute::get_all_by_leave($sn);
+// 取得代課明細（已含 display_class 解析；escape=false 同上，避免 PDF 顯示雙重轉義）
+$substitutes = Jill_leave_substitute::get_all_by_leave($sn, false);
 
 // 展開為逐列陣列，方便後續迭代
 $rows = [];

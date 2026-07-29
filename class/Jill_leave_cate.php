@@ -156,8 +156,11 @@ class Jill_leave_cate
         $sql = "SELECT * FROM `" . $xoopsDB->prefix("jill_leave_cate") . "` WHERE 1 $and_sql";
         $result = $xoopsDB->query($sql) or Utility::web_error($sql);
         $data = $xoopsDB->fetchArray($result);
+        if (empty($data)) {
+            return [];
+        }
         $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
-        
+
 
         // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
         //     $data['xxx'] = ooo::get_all();

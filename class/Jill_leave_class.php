@@ -74,21 +74,30 @@ class Jill_leave_class
         return array_merge($default, ['subject' => $raw]);
     }
 
-    //把一列原始節次資料整理成顯示用（解析 subject、套 htmlspecialchars），供 show／總覽／Excel 共用
-    public static function display_class($class = [])
+    //把一列原始節次資料整理成顯示用（解析 subject），供 show／總覽／Excel／表單回填共用
+    //$escape=true 套 htmlspecialchars（HTML 顯示用）；$escape=false 保留原始字串
+    //（表單回填走 JS 的 .val()，不是 HTML 渲染，escape 過的字串會在畫面上雙重轉義顯示 &amp;）
+    public static function display_class($class = [], $escape = true)
     {
-        $myts = \MyTextSanitizer::getInstance();
         $decoded = self::decode_subject($class['subject'] ?? '');
-        $class['grade_class'] = $myts->htmlSpecialChars($decoded['grade_class']);
-        $class['subject'] = $myts->htmlSpecialChars($decoded['subject']);
+        $class['grade_class'] = $decoded['grade_class'];
+        $class['subject'] = $decoded['subject'];
         //處理方式與異動後課程（代課列 handle 為 substitute，swap_* 為空字串）
         $class['handle'] = $decoded['handle'];
         $class['handle_text'] = self::handle_text($decoded['handle']);
-        foreach (['swap_date', 'swap_period', 'swap_subject'] as $key) {
-            $class[$key] = $myts->htmlSpecialChars($decoded[$key]);
+        $class['swap_date'] = $decoded['swap_date'];
+        $class['swap_period'] = $decoded['swap_period'];
+        $class['swap_subject'] = $decoded['swap_subject'];
+        $class['class_period'] = (string) ($class['class_period'] ?? '');
+        $class['substitute_teacher'] = (string) ($class['substitute_teacher'] ?? '');
+
+        if ($escape) {
+            $myts = \MyTextSanitizer::getInstance();
+            foreach (['grade_class', 'subject', 'swap_date', 'swap_period', 'swap_subject', 'class_period', 'substitute_teacher'] as $key) {
+                $class[$key] = $myts->htmlSpecialChars($class[$key]);
+            }
         }
-        $class['class_period'] = $myts->htmlSpecialChars((string) ($class['class_period'] ?? ''));
-        $class['substitute_teacher'] = $myts->htmlSpecialChars((string) ($class['substitute_teacher'] ?? ''));
+
         $class['class_sn'] = (int) ($class['class_sn'] ?? 0);
         $class['substitute_sn'] = (int) ($class['substitute_sn'] ?? 0);
         $class['sn'] = (int) ($class['sn'] ?? 0);

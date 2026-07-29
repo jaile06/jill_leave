@@ -144,7 +144,7 @@ class Tools
         $file = str_replace('\\', '/', $file);
         //注意：不可用 PHP_SELF 判斷後台（可被 PATH_INFO 偽造），後台已於 admin/main.php 設定 session
         if (!empty($_SESSION['jill_leave_adm']) || ($other != '' && !empty($_SESSION[$other]))) {
-            if (!empty($id) && $_SESSION[$other]) {
+            if (!empty($id) && $other !== '' && !empty($_SESSION[$other])) {
                 if (in_array($id, $_SESSION[$other]) || $id == $_SESSION[$other]) {
                     return true;
                 } elseif ($mode == 'return') {

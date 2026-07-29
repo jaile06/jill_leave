@@ -92,7 +92,8 @@ class Jill_leave_substitute
 
 
     //取得某假單的代課資料（含節次明細，巢狀陣列）Jill_leave_substitute::get_all_by_leave()
-    public static function get_all_by_leave($sn = 0)
+    //$escape=false 供表單回填／PDF 等非 HTML 顯示情境使用，避免雙重轉義
+    public static function get_all_by_leave($sn = 0, $escape = true)
     {
         global $xoopsDB;
 
@@ -115,7 +116,7 @@ class Jill_leave_substitute
             $substitutes[$substitute_sn]['type_text'] = match ($substitute['type']) { 'hour' => _MD_JILLLEAVE_TYPE_HOUR, 'swap' => _MD_JILLLEAVE_TYPE_SWAP, default => _MD_JILLLEAVE_TYPE_DAILY };
         }
         foreach ($classes as $class) {
-            $class = Jill_leave_class::display_class($class);
+            $class = Jill_leave_class::display_class($class, $escape);
             if (isset($substitutes[$class['substitute_sn']])) {
                 $substitutes[$class['substitute_sn']]['classes'][] = $class;
             }
@@ -129,7 +130,8 @@ class Jill_leave_substitute
     public static function get_rows_by_leave($sn = 0)
     {
         $rows = [];
-        foreach (self::get_all_by_leave($sn) as $substitute) {
+        //供表單回填用，取原始未轉義字串（畫面上以 jQuery .val() 填值，非 HTML 渲染）
+        foreach (self::get_all_by_leave($sn, false) as $substitute) {
             if (empty($substitute['classes'])) {
                 //僅有代課日期而無節次
                 $rows[] = [

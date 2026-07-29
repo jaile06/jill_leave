@@ -28,7 +28,7 @@ function jill_leave_show_edit($options)
     $form = "
     <ol class='my-form'>
         <li>" . _MB_JILLLEAVE_SHOW_LIMIT . "：
-            <input type='number' name='options[0]' value='{$options[0]}' size='4'>
+            <input type='number' name='options[0]' value='" . htmlspecialchars((string) $options[0], ENT_QUOTES) . "' size='4'>
         </li>
     </ol>
     ";
