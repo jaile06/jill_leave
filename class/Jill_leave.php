@@ -308,6 +308,15 @@ class Jill_leave
         }
     }
 
+    //檢查假別是否存在，不存在則導轉並中止（避免前端被繞過時寫入無效的 cate_sn）
+    private static function chk_cate_exists($cate_sn, $redirect_url)
+    {
+        $cate = Jill_leave_cate::get(['cate_sn' => (int) $cate_sn], [], '');
+        if (empty($cate)) {
+            redirect_header($redirect_url, 3, _MD_JILLLEAVE_NO_CONDITION);
+        }
+    }
+
     //新增資料到 jill_leave Jill_leave::store()
     public static function store()
     {
@@ -330,6 +339,7 @@ class Jill_leave
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
         self::chk_date_range($start_date, $end_date, XOOPS_URL . '/modules/jill_leave/index.php');
+        self::chk_cate_exists($cate_sn, XOOPS_URL . '/modules/jill_leave/index.php');
 
         //一般使用者僅能建立自己的假單且狀態固定為待審核，管理者可指定狀態
         $uid = ($xoopsUser) ? $xoopsUser->uid() : 0;
@@ -435,6 +445,7 @@ class Jill_leave
         $start_date = Tools::filter('start_date', $_POST['start_date'] ?? '', 'write', self::$filter_arr);
         $end_date = Tools::filter('end_date', $_POST['end_date'] ?? '', 'write', self::$filter_arr);
         self::chk_date_range($start_date, $end_date, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . (int) ($where_arr['sn'] ?? 0));
+        self::chk_cate_exists($cate_sn, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . (int) ($where_arr['sn'] ?? 0));
 
         //更新時檢查日期重疊（排除自身 sn）
         $self_sn = (int) ($where_arr['sn'] ?? 0);
