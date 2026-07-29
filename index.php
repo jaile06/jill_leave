@@ -14,6 +14,10 @@ $class_sn = Request::getInt('class_sn');
 
 //點選直接更新審核狀態 (AJAX) - 必須在載入佈景與標頭前先處理並結束以回傳乾淨的 JSON
 if ($op === 'update_status') {
+    global $xoopsLogger;
+    $xoopsLogger->activated = false;
+    header('Content-Type: application/json');
+
     //僅管理員可更新狀態
     if (empty($_SESSION['jill_leave_adm'])) {
         echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_NO_PERMISSION]);

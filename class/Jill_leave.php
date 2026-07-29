@@ -408,8 +408,12 @@ class Jill_leave
 
         if (!empty($data_arr)) {
             Tools::chk_is_adm('', '', __FILE__, __LINE__);
-            $col_arr = [];
 
+            //僅允許已知欄位，禁止呼叫端把使用者輸入當 key 傳入而注入任意欄位/SQL
+            $allowed_cols = ['leavers', 'cate_sn', 'is_advisor', 'grade_class', 'start_date', 'end_date', 'status', 'update_date'];
+            $data_arr = array_intersect_key($data_arr, array_flip($allowed_cols));
+
+            $col_arr = [];
             foreach ($data_arr as $key => $value) {
                 $value = Tools::filter($key, $value, 'write', self::$filter_arr);
                 $col_arr[] = "`$key` = '{$value}'";

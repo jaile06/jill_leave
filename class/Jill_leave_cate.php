@@ -257,8 +257,11 @@ class Jill_leave_cate
         $and = Tools::get_and_where($where_arr);
 
         if (!empty($data_arr)) {
-            $col_arr = [];
+            //僅允許已知欄位，禁止呼叫端把使用者輸入當 key 傳入而注入任意欄位/SQL
+            $allowed_cols = ['cate_title', 'cate_sort', 'enable'];
+            $data_arr = array_intersect_key($data_arr, array_flip($allowed_cols));
 
+            $col_arr = [];
             foreach ($data_arr as $key => $value) {
                 $value = Tools::filter($key, $value, 'write', self::$filter_arr);
                 $col_arr[] = "`$key` = '{$value}'";
@@ -293,18 +296,13 @@ class Jill_leave_cate
         global $xoopsDB;
         Tools::chk_is_adm('', '', __FILE__, __LINE__);
 
-        if(empty($cate_sn)) {
+        $cate_sn = (int) $cate_sn;
+        if (empty($cate_sn)) {
             return;
         }
 
-        $and = '';
-        if($cate_sn){
-        $and .= "and `cate_sn` = '$cate_sn'";
-    }
-    
-
         $sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave_cate") . "`
-        WHERE 1 $and";
+        WHERE 1 and `cate_sn` = '{$cate_sn}'";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
         
     }
