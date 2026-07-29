@@ -344,11 +344,12 @@ class Jill_leave
         //一般使用者僅能建立自己的假單且狀態固定為待審核，管理者可指定狀態
         $uid = ($xoopsUser) ? $xoopsUser->uid() : 0;
 
-        //檢查同一人是否在相同日期區間已有假單（日期區間重疊判斷）
+        //檢查同一人是否在相同日期區間已有假單（日期區間重疊判斷；已駁回的假單不計入）
         $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
             WHERE `uid` = '{$uid}'
             AND `start_date` <= '{$end_date}'
-            AND `end_date` >= '{$start_date}'";
+            AND `end_date` >= '{$start_date}'
+            AND `status` != '2'";
         list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
         if ($dup_count > 0) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
@@ -447,14 +448,15 @@ class Jill_leave
         self::chk_date_range($start_date, $end_date, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . (int) ($where_arr['sn'] ?? 0));
         self::chk_cate_exists($cate_sn, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . (int) ($where_arr['sn'] ?? 0));
 
-        //更新時檢查日期重疊（排除自身 sn）
+        //更新時檢查日期重疊（排除自身 sn；已駁回的假單不計入）
         $self_sn = (int) ($where_arr['sn'] ?? 0);
         $uid_chk = (int) $old['uid'];
         $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
             WHERE `uid` = '{$uid_chk}'
             AND `start_date` <= '{$end_date}'
             AND `end_date` >= '{$start_date}'
-            AND `sn` != '{$self_sn}'";
+            AND `sn` != '{$self_sn}'
+            AND `status` != '2'";
         list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
         if ($dup_count > 0) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn, 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
