@@ -136,17 +136,7 @@
     <div class="card mb-3 substitute-card">
         <div class="card-header d-flex flex-wrap align-items-center gap-3">
             <strong class="me-auto"><i class="fa fa-calendar"></i> <span class="substitute-date-text"></span></strong>
-            <!--支付方式（補調課不涉及代課鐘點費，不顯示此欄）-->
-            <div class="d-inline-flex align-items-center pay-method-wrap">
-                <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></span>
-                <div class="form-check form-check-inline">
-                    <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="self" checked> <{$smarty.const._MD_JILLLEAVE_PAY_SELF_FULL}></label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="school"> <{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL_FULL}></label>
-                </div>
-            </div>
-            <!--調代課類型-->
+            <!--調代課類型（決定支付方式是否顯示，固定放前面，避免支付方式隱藏時版面跳動）-->
             <div class="d-inline-flex align-items-center">
                 <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></span>
                 <div class="form-check form-check-inline">
@@ -157,6 +147,16 @@
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="swap"> <{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}></label>
+                </div>
+            </div>
+            <!--支付方式（補調課不涉及代課鐘點費，不顯示此欄）-->
+            <div class="d-inline-flex align-items-center pay-method-wrap">
+                <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></span>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="self" checked> <{$smarty.const._MD_JILLLEAVE_PAY_SELF_FULL}></label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label"><input type="radio" class="form-check-input pay-radio" value="school"> <{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL_FULL}></label>
                 </div>
             </div>
             <!--同第一天按鈕（非第一張卡片才顯示）-->
