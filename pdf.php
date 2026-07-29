@@ -8,8 +8,10 @@ use XoopsModules\Jill_leave\Jill_leave_substitute;
 /*-----------引入檔案區--------------*/
 require_once __DIR__ . '/header.php';
 
-// 屏蔽所有警告與非致命錯誤，以防污染 PDF 二進位資料流
-error_reporting(0);
+// 僅關閉畫面輸出，避免 Warning 等訊息污染 PDF 二進位資料流；
+// 不動 error_reporting，讓錯誤仍照站台設定寫入 log（log_errors 不受 display_errors 影響），
+// 真正跑出問題時還查得到，而非整批消音。輸出前的 ob_end_clean() 是最後一道防線，
+// 萬一真的有東西被印出來也會在送出 PDF 前清掉。
 ini_set('display_errors', 0);
 
 // 僅登入使用者才可以匯出 PDF
