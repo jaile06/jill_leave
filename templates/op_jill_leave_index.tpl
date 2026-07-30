@@ -2,7 +2,7 @@
     <div id="jill_leave_save_msg"></div>
 
     <div class="table-responsive">
-    <table data-toggle="table" data-pagination="true" data-search="true" data-search-highlight="true" data-mobile-responsive="true" class="table table-sm table-striped table-hover">
+        <table data-toggle="table" data-pagination="true" data-search="true" data-search-highlight="true" data-mobile-responsive="true" class="table table-sm table-striped table-hover">
         <thead>
             <tr>
             <!--請假者姓名-->
@@ -26,7 +26,8 @@
                 <{/if}>
             </tr>
         </thead>
-        <{foreach from=$all_jill_leave key=k item=data name=all_jill_leave}>
+        <tbody>
+        <{foreach from=$all_jill_leave item=data}>
             <tr>
 
             <!--請假者姓名-->
@@ -49,22 +50,10 @@
 
             <!--審核狀態-->
             <td class="text-center">
-                <{if $smarty.session.jill_leave_adm|default:false}>
-                    <{if $data.status == 1}>
-                        <button type="button" class="badge border-0 bg-success update-status" data-sn="<{$data.sn}>" data-status="1" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
-                    <{elseif $data.status == 2}>
-                        <button type="button" class="badge border-0 bg-danger update-status" data-sn="<{$data.sn}>" data-status="2" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
-                    <{else}>
-                        <button type="button" class="badge border-0 bg-secondary update-status" data-sn="<{$data.sn}>" data-status="0" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
-                    <{/if}>
+                <{if $data.can_update_status|default:false}>
+                    <button type="button" class="badge border-0 bg-<{$data.status_class}> update-status" data-sn="<{$data.sn}>" data-status="<{$data.status}>" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
                 <{else}>
-                    <{if $data.status == 1}>
-                        <span class="badge bg-success"><{$data.status_text}></span>
-                    <{elseif $data.status == 2}>
-                        <span class="badge bg-danger"><{$data.status_text}></span>
-                    <{else}>
-                        <span class="badge bg-secondary"><{$data.status_text}></span>
-                    <{/if}>
+                    <span class="badge bg-<{$data.status_class}>"><{$data.status_text}></span>
                 <{/if}>
             </td>
 
@@ -73,19 +62,21 @@
 
                 <{if $smarty.session.now_user|default:false}>
                     <td>
-                        <{if $smarty.session.jill_leave_adm|default:false or $data.uid == $smarty.session.now_user.uid|default:0}>
-                            <{* 已通過的假單僅管理員可刪除/編輯 *}>
-                            <{if $smarty.session.jill_leave_adm|default:false or $data.status != 1}>
-                                <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
-                                <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
-                            <{/if}>
+                        <{if $data.can_delete|default:false}>
+                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
+                        <{/if}>
+                        <{if $data.can_edit|default:false}>
+                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                        <{/if}>
+                        <{if $data.can_export_pdf|default:false}>
                             <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" aria-label="匯出 PDF" title="匯出 PDF"><i class="fa fa-file-pdf"></i></a>
                         <{/if}>
                     </td>
                 <{/if}>
             </tr>
         <{/foreach}>
-    </table>
+        </tbody>
+        </table>
     </div>
 
     <{if $smarty.session.now_user|default:false}>
@@ -96,7 +87,7 @@
         </div>
     <{/if}>
 
-    <div class="bar"><{$bar|default:''}></div>
+
 <{else}>
     <div class="alert alert-warning text-center">
         <{if $smarty.session.now_user|default:false}>
@@ -111,77 +102,12 @@
 
 <{if $smarty.session.jill_leave_adm|default:false}>
 <script>
-$(function(){
-    // 使用事件委託，防止 bootstrapTable 重新分頁/搜尋後事件失效
-    $(document).on('click', '.update-status', function(e){
-        e.preventDefault();
-        var $span = $(this);
-        if ($span.next('.status-select').length > 0) return; // 防止重複觸發
-
-        var sn = $span.data('sn');
-        var status = $span.data('status');
-        var hasChanged = false;
-
-        // 建立 select 下拉選單
-        var $select = $('<select class="form-select form-select-sm status-select" style="width: auto; display: inline-block; padding: 2px 8px; font-size: 0.85rem;"></select>');
-        $select.append('<option value="0">待審核</option>');
-        $select.append('<option value="1">已通過</option>');
-        $select.append('<option value="2">駁回</option>');
-        $select.val(status);
-
-        $span.hide();
-        $span.after($select);
-        $select.focus();
-
-        // 變更狀態
-        $select.on('change', function(){
-            hasChanged = true;
-            var nextStatus = parseInt($(this).val());
-            $.post('index.php', {
-                op: 'update_status',
-                sn: sn,
-                status: nextStatus,
-                XOOPS_TOKEN_REQUEST: '<{$csrf_token}>'
-            }, function(res){
-                if (res.success) {
-                    var $allBadges = $('.update-status[data-sn="' + sn + '"]');
-                    $allBadges.each(function(){
-                        var $b = $(this);
-                        $b.data('status', nextStatus);
-                        $b.text(res.status_text);
-                        $b.removeClass('bg-success bg-danger bg-secondary');
-                        if (nextStatus === 1) {
-                            $b.addClass('bg-success');
-                        } else if (nextStatus === 2) {
-                            $b.addClass('bg-danger');
-                        } else {
-                            $b.addClass('bg-secondary');
-                        }
-                        $b.show();
-                    });
-                    $select.remove();
-                } else {
-                    alert(res.message || '更新審核狀態失敗');
-                    $span.show();
-                    $select.remove();
-                }
-            }, 'json').fail(function() {
-                alert('系統錯誤，無法變更狀態。');
-                $span.show();
-                $select.remove();
-            });
-        });
-
-        // 失去焦點復原
-        $select.on('blur', function(){
-            setTimeout(function(){
-                if (!hasChanged) {
-                    $span.show();
-                    $select.remove();
-                }
-            }, 250);
-        });
-    });
-});
+window.jillLeaveConfig = {
+    ajaxUrl: '<{$xoops_url}>/modules/jill_leave/index.php',
+    csrfToken: '<{$csrf_token}>',
+    statusLabels: <{$status_labels_json|default:'{}'}>,
+    errorMsg: '<{$smarty.const._MD_JILLLEAVE_TOKEN_ERROR|default:"系統錯誤，無法變更狀態。"}>'
+};
 </script>
+<script src="<{$xoops_url}>/modules/jill_leave/js/jill_leave_index.js"></script>
 <{/if}>

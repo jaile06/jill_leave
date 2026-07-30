@@ -14,6 +14,68 @@ use XoopsModules\Tadtools\My97DatePicker;
 
 class Jill_leave
 {
+    // 群組 ID 常數定義
+    const GROUP_STUDENT = 4;
+
+    /**
+     * 檢查當前使用者是否為請假模組管理者
+     */
+    public static function isAdmin(): bool
+    {
+        return !empty($_SESSION['jill_leave_adm']);
+    }
+
+    /**
+     * 檢查指定使用者（或當前使用者）是否為學生群組
+     */
+    public static function isStudent(?\XoopsUser $user = null): bool
+    {
+        global $xoopsUser;
+        $user = $user ?? $xoopsUser;
+        if (!$user) {
+            return false;
+        }
+        return in_array(self::GROUP_STUDENT, $user->getGroups(), true);
+    }
+
+    /**
+     * 檢查使用者存取權限並配置 Smarty 警示（未通過傳回 0）
+     */
+    public static function requireEditableUser(): int
+    {
+        global $xoopsUser, $xoopsTpl;
+
+        if (empty($xoopsUser)) {
+            $xoopsTpl->assign('show_login_alert', true);
+            return 0;
+        }
+
+        if (self::isStudent($xoopsUser)) {
+            $xoopsTpl->assign('show_login_alert', false);
+            $xoopsTpl->assign('show_student_alert', true);
+            return 0;
+        }
+
+        return (int) $xoopsUser->uid();
+    }
+
+    /**
+     * 針對單筆紀錄，計算前端按鈕所需的權限旗標
+     */
+    public static function recordPermissions(array $record, int $currentUid): array
+    {
+        $isOwner    = ((int) $record['uid'] === $currentUid);
+        $isAdmin    = self::isAdmin();
+        $isApproved = ((int) $record['status'] === 1);
+
+        return [
+            'can_edit'          => ($isAdmin || ($isOwner && !$isApproved)),
+            'can_delete'        => ($isAdmin || ($isOwner && !$isApproved)),
+            'can_export_pdf'    => ($isAdmin || $isOwner),
+            'can_update_status' => $isAdmin,
+        ];
+    }
+
     // 過濾用變數的設定
     public static $filter_arr = [
         'int' => ['sn', 'uid', 'cate_sn', 'is_advisor', 'status'], //數字類的欄位
@@ -34,6 +96,16 @@ class Jill_leave
         };
     }
 
+    //審核狀態 Badge 樣式類別
+    public static function status_class($status = 0): string
+    {
+        return match ((int) $status) {
+            1 => 'success',
+            2 => 'danger',
+            default => 'secondary',
+        };
+    }
+
     //列出所有 jill_leave 資料 Jill_leave::index()
     public static function index($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $amount = '')
     {
@@ -48,26 +120,31 @@ class Jill_leave
         }
 
         $xoopsTpl->assign('all_jill_leave', $all_jill_leave);
-        Utility::test($all_jill_leave, 'all_jill_leave');
 
         //CSRF token（GET 刪除連結與 AJAX 狀態切換共用，不清除以供同頁多次操作）
         $token = $GLOBALS['xoopsSecurity']->createToken();
         $xoopsTpl->assign('csrf_token', $token);
+
+        // 審核狀態語系對照（供前端 JS 動態選單使用）
+        $status_labels = [
+            0 => _MD_JILLLEAVE_STATUS_0,
+            1 => _MD_JILLLEAVE_STATUS_1,
+            2 => _MD_JILLLEAVE_STATUS_2,
+        ];
+        $xoopsTpl->assign('status_labels_json', json_encode($status_labels, JSON_UNESCAPED_UNICODE));
 
         //刪除確認的JS
         $SweetAlert = new SweetAlert();
         $SweetAlert->render('jill_leave_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_destroy&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
 
         BootstrapTable::render();
-
-        $fancybox = new FancyBox('.fancybox_jill_leave_sn');
-        $fancybox->render();
     }
 
     //取得 jill_leave 所有資料陣列 Jill_leave::get_all()
     public static function get_all($where_arr = [], $other_arr = [], $view_cols = [], $order_arr = [], $key_name = false, $get_value = '', $filter = 'read', $amount = '')
     {
-        global $xoopsDB;
+        global $xoopsDB, $xoopsUser;
+        $currentUid = $xoopsUser ? (int) $xoopsUser->uid() : 0;
 
         $and_sql = Tools::get_and_where($where_arr);
         $view_col = Tools::get_view_col($view_cols);
@@ -98,10 +175,15 @@ class Jill_leave
 
             $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
 
-            //假別名稱、審核狀態、是否導師等顯示用欄位
-            $data['cate_sn_title'] = $cate_title_arr[$data['cate_sn']] ?? '';
-            $data['status_text'] = self::status_text($data['status']);
-            $data['is_advisor_text'] = $data['is_advisor'] ? _MD_JILLLEAVE_ADVISOR : _MD_JILLLEAVE_SUBJECT_TEACHER;
+            //假別名稱、審核狀態、是否導師與權限等顯示用欄位
+            $data['cate_sn_title']   = $cate_title_arr[$data['cate_sn']] ?? '';
+            $data['status_text']     = self::status_text($data['status']);
+            $data['status_class']    = self::status_class($data['status']);
+            $data['is_advisor_text']  = $data['is_advisor'] ? _MD_JILLLEAVE_ADVISOR : _MD_JILLLEAVE_SUBJECT_TEACHER;
+
+            // 將權限旗標展平併入頂層
+            $perms = self::recordPermissions($data, $currentUid);
+            $data  = array_merge($data, $perms);
 
             foreach (self::$filter_arr['explode'] as $item) {
                 $data[$item . '_arr'] = explode(';', $data[$item]);
@@ -716,5 +798,18 @@ class Jill_leave
         $status = in_array((int) $status, [0, 1, 2], true) ? (int) $status : 0;
         $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave") . "` SET `status` = '{$status}' WHERE `sn` = '{$sn}'";
         return $xoopsDB->queryF($sql) ? true : false;
+    }
+
+    /**
+     * 模組頁面重定向輔助工具
+     *
+     * @param string $query 查詢字串 (例: '?sn=1')
+     * @param string $file  目標檔名 (預設: 'index.php')
+     */
+    public static function redirect(string $query = '', string $file = 'index.php'): void
+    {
+        $url = XOOPS_URL . "/modules/jill_leave/{$file}{$query}";
+        header("Location: {$url}");
+        exit;
     }
 }
