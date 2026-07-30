@@ -24,6 +24,9 @@ $uid = Jill_leave::requireEditableUser();
 /* ===== 4. 核心 CRUD 路由 (僅登入且非學生執行，回傳解析後的 $op 供 footer.php 載入樣板) ===== */
 if ($uid > 0) {
     $op = handleAction($op, $sn, $cateSn, $uid);
+} else {
+    // 未通過權限驗證，清空 $op 防止透過 URL 直接載入受保護的子樣板
+    $op = '';
 }
 
 /* ===== 5. 載入佈景頁尾 ===== */
