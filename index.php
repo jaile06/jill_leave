@@ -1,84 +1,88 @@
 <?php
 use Xmf\Request;
 use XoopsModules\Jill_leave\Jill_leave;
-use XoopsModules\Jill_leave\Jill_leave_class;
 
-/*-----------引入檔案區--------------*/
+/*----------- 引入基礎設定與檔頭 -----------*/
 require_once __DIR__ . '/header.php';
 
-/*-----------變數過濾----------*/
-$op = Request::getString('op');
-$sn = Request::getInt('sn');
+/*----------- HTTP 請求變數過濾與擷取 -----------*/
+$op      = Request::getString('op');
+$sn      = Request::getInt('sn');
 $cate_sn = Request::getInt('cate_sn');
-$class_sn = Request::getInt('class_sn');
 
-//點選直接更新審核狀態 (AJAX) - 必須在載入佈景與標頭前先處理並結束以回傳乾淨的 JSON
+/*----------- AJAX 審核狀態即時更新處理 -----------*/
+// 點選直接更新審核狀態 (AJAX) - 必須在載入 XOOPS 佈景主題前處理並輸出 JSON
 if ($op === 'update_status') {
-    global $xoopsLogger;
+    global $xoopsLogger, $xoopsSecurity;
     $xoopsLogger->activated = false;
     header('Content-Type: application/json');
 
-    //僅管理員可更新狀態
+    // 權限檢查：僅管理者權限可變更審核狀態
     if (empty($_SESSION['jill_leave_adm'])) {
         echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_NO_PERMISSION]);
         exit;
     }
-    //CSRF 檢查（不清除 token，同頁可多次切換）
-    if (!$GLOBALS['xoopsSecurity']->check(false)) {
+
+    // CSRF 安全 Token 檢查 (check(false) 避免清除 token 允許同頁多次切換)
+    if (!$xoopsSecurity->check(false)) {
         echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_TOKEN_ERROR]);
         exit;
     }
-    $status = Request::getInt('status');
+
+    $status  = Request::getInt('status');
     $success = Jill_leave::update_status($sn, $status);
-    echo json_encode(['success' => $success, 'status_text' => Jill_leave::status_text($status)]);
+
+    echo json_encode([
+        'success'     => $success,
+        'status_text' => Jill_leave::status_text($status),
+    ]);
     exit;
 }
 
+/*----------- 載入 XOOPS 系統前端頁首與樣板設定 -----------*/
 $GLOBALS['xoopsOption']['template_main'] = 'jill_leave_index.tpl';
 require_once XOOPS_ROOT_PATH . '/header.php';
 
-// 未登入警示（不跳轉）
+/*----------- 使用者身份與存取權限驗證 -----------*/
+$uid       = $xoopsUser ? (int) $xoopsUser->uid() : 0;
+$isStudent = $xoopsUser && in_array(4, $xoopsUser->getGroups(), true);
+
 if (empty($xoopsUser)) {
+    // 未登入者顯示登入提示
     $xoopsTpl->assign('show_login_alert', true);
-    $op = ''; // 未登入不執行任何 action，不載入子樣板
-} elseif (in_array(4, $xoopsUser->getGroups(), true)) {
-    // 限制學生群組 (群組 ID 4) 不能使用請假模組
+} elseif ($isStudent) {
+    // 學生群組 (ID: 4) 禁止使用本請假系統
     $xoopsTpl->assign('show_login_alert', false);
     $xoopsTpl->assign('show_student_alert', true);
-    $op = '';
-}
-
-/*-----------執行動作判斷區----------*/
-if (!empty($xoopsUser) && !in_array(4, $xoopsUser->getGroups(), true)) {
+} else {
+    /*----------- 核心業務邏輯動作路由與處理 -----------*/
     switch ($op) {
 
-        //新增資料（含代課資訊批次儲存）
+        // 新增請假單資料 (含代課資訊)
         case 'jill_leave_store':
             $sn = Jill_leave::store();
-            header("location: {$_SERVER['PHP_SELF']}?sn=$sn");
+            header("location: {$_SERVER['PHP_SELF']}?sn={$sn}");
             exit;
 
-        //更新資料（含代課資訊批次儲存）
+        // 更新請假單資料
         case 'jill_leave_update':
-            $where_arr['sn'] = $sn;
-            Jill_leave::update($where_arr);
-            header("location: {$_SERVER['PHP_SELF']}?sn=$sn");
+            Jill_leave::update(['sn' => $sn]);
+            header("location: {$_SERVER['PHP_SELF']}?sn={$sn}");
             exit;
 
-        //新增用表單
+        // 顯示新增請假單表單
         case 'jill_leave_create':
             Jill_leave::create('', $cate_sn);
             break;
 
-        //修改用表單
+        // 顯示編輯請假單表單
         case 'jill_leave_edit':
             Jill_leave::create($sn);
             $op = 'jill_leave_create';
             break;
 
-        //刪除資料（連帶刪除代課與節次資料）
+        // 刪除請假單 (含連帶刪除代課與節次資料)
         case 'jill_leave_destroy':
-            //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
             if (!$GLOBALS['xoopsSecurity']->check(false)) {
                 redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
             }
@@ -86,32 +90,31 @@ if (!empty($xoopsUser) && !in_array(4, $xoopsUser->getGroups(), true)) {
             header("location: {$_SERVER['PHP_SELF']}");
             exit;
 
-        //列出所有資料
+        // 顯示特定單筆請假單內容
+        case 'jill_leave_show':
+            Jill_leave::show(['sn' => $sn]);
+            break;
+
+        // 請假單列表 (預設動作)
         case 'jill_leave_index':
         default:
             if (!empty($sn)) {
-                $where_arr['sn'] = $sn;
-                Jill_leave::show($where_arr);
+                Jill_leave::show(['sn' => $sn]);
                 $op = 'jill_leave_show';
                 break;
             }
 
-            //主頁一律僅列出個人請假紀錄（管理員看全校請走「代課管理」總覽）
-            $where_arr = [];
-            $where_arr['uid'] = isset($xoopsUser) && is_object($xoopsUser) ? (int) $xoopsUser->uid() : 0;
+            // 僅列出當前登入使用者的請假紀錄
+            $where_arr = ['uid' => $uid];
             if (!empty($cate_sn)) {
                 $where_arr['cate_sn'] = $cate_sn;
             }
+
             Jill_leave::index($where_arr, [], [], ['start_date' => 'DESC'], 20);
             $op = 'jill_leave_index';
-            break;
-
-        //顯示某筆資料
-        case 'jill_leave_show':
-            $where_arr['sn'] = $sn;
-            Jill_leave::show($where_arr);
             break;
     }
 }
 
+/*----------- 載入 XOOPS 系統前端頁尾 -----------*/
 require_once __DIR__ . '/footer.php';

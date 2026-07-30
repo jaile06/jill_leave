@@ -90,7 +90,7 @@
 
     <{if $smarty.session.now_user|default:false}>
         <div class="text-end my-3">
-            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create&cate_sn=<{$cate_sn|default:''}>" class="btn btn-info">
+            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-info">
                 <i class="fa fa-plus"></i> <{$smarty.const._TAD_ADD}>
             </a>
         </div>
@@ -100,7 +100,7 @@
 <{else}>
     <div class="alert alert-warning text-center">
         <{if $smarty.session.now_user|default:false}>
-            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create&cate_sn=<{$cate_sn|default:''}>" class="btn btn-info">
+            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-info">
                 <i class="fa fa-plus"></i> <{$smarty.const._TAD_ADD}>
             </a>
         <{else}>
