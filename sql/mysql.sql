@@ -22,6 +22,7 @@ CREATE TABLE `jill_leave_cate` (
   `cate_title` varchar(100) NOT NULL COMMENT '假別名稱',
   `cate_sort` smallint(5) unsigned NOT NULL DEFAULT 0 COMMENT '假別排序',
   `enable` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT '啟用狀態 (1:啟用 0:停用)',
+  `force_pay` enum('','self','school') NOT NULL DEFAULT '' COMMENT '鎖定支付方式（空:不鎖定 self:自費 school:公費）',
   PRIMARY KEY (`cate_sn`),
   KEY `idx_sort` (`cate_sort`),
   KEY `idx_enable` (`enable`)

@@ -97,7 +97,7 @@
         <div class="form-floating mb-3">
             <select name="cate_sn" id="cate_sn" class="form-select validate[required]" size="1">
                 <{foreach from=$cate_sn_options item=opt}>
-                    <option value="<{$opt.cate_sn}>" <{if $cate_sn==$opt.cate_sn}>selected<{/if}>><{$opt.cate_title}></option>
+                    <option value="<{$opt.cate_sn}>" data-force-pay="<{$opt.force_pay|default:''}>" <{if $cate_sn==$opt.cate_sn}>selected<{/if}>><{$opt.cate_title}></option>
                 <{/foreach}>
             </select>
             <label for="cate_sn"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>

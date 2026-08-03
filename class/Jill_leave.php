@@ -335,7 +335,7 @@ class Jill_leave
         }
 
         //假別選單（僅啟用中的假別）
-        $cate_sn_options_array = Jill_leave_cate::get_all(['enable' => 1], [], ['cate_sn', 'cate_title'], ['cate_sort' => 'ASC']);
+        $cate_sn_options_array = Jill_leave_cate::get_all(['enable' => 1], [], ['cate_sn', 'cate_title', 'force_pay'], ['cate_sort' => 'ASC']);
         $xoopsTpl->assign("cate_sn_options", $cate_sn_options_array);
 
         //預設值設定

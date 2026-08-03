@@ -21,6 +21,8 @@
             <tr>
             <!--假別名稱-->
             <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></th>
+            <!--鎖定支付方式-->
+            <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY}></th>
             <!--啟用狀態-->
             <th scope="col" class="nowrap c"><{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}></th>
                 <{if $smarty.session.jill_leave_adm|default:false}>
@@ -33,6 +35,17 @@
             <tr id="tr-<{$data.cate_sn}>">
             <!--假別名稱-->
             <td><a href="<{$xoops_url}>/modules/jill_leave/cate.php?cate_sn=<{$data.cate_sn}>"><{$data.cate_title}></a></td>
+
+            <!--鎖定支付方式-->
+            <td class="text-center">
+                <{if $data.force_pay == 'self'}>
+                    <span class="badge bg-warning text-dark"><{$smarty.const._MD_JILLLEAVE_PAY_SELF}></span>
+                <{elseif $data.force_pay == 'school'}>
+                    <span class="badge bg-success"><{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL}></span>
+                <{else}>
+                    <span class="badge bg-secondary"><{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY_NONE}></span>
+                <{/if}>
+            </td>
 
             <!--啟用狀態-->
             <td class="text-center">

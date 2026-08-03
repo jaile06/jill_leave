@@ -27,6 +27,8 @@ define('_MD_JILLLEAVE_CATE_CATE_SN', '假別編號');
 define('_MD_JILLLEAVE_CATE_CATE_TITLE', '假別名稱');
 define('_MD_JILLLEAVE_CATE_CATE_SORT', '假別排序');
 define('_MD_JILLLEAVE_CATE_ENABLE', '狀態');
+define('_MD_JILLLEAVE_CATE_FORCE_PAY', '鎖定支付方式');
+define('_MD_JILLLEAVE_CATE_FORCE_PAY_NONE', '不鎖定');
 define('_MD_JILLLEAVE_SUBSTITUTE', '代課管理');
 define('_MD_JILLLEAVE_SUBSTITUTE_PAY_DEF', '自費');
 define('_MD_JILLLEAVE_SUBSTITUTE_TYPE_DEF', '日薪');

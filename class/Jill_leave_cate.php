@@ -193,6 +193,7 @@ class Jill_leave_cate
         $def['cate_title'] = '';
         $def['cate_sort'] = self::max_sort();
         $def['enable'] = 1;
+        $def['force_pay'] = '';
 
         if (empty($jill_leave_cate)) {
             $jill_leave_cate = $def;
@@ -232,15 +233,18 @@ class Jill_leave_cate
         $cate_title = Tools::filter('cate_title', $data_arr['cate_title'] ?? '', 'write', self::$filter_arr);
         $cate_sort = Tools::filter('cate_sort', $data_arr['cate_sort'] ?? 0, 'write', self::$filter_arr);
         $enable = Tools::filter('enable', $data_arr['enable'] ?? 0, 'write', self::$filter_arr);
+        $force_pay = in_array($data_arr['force_pay'] ?? '', ['self', 'school'], true) ? $data_arr['force_pay'] : '';
 
         $sql = "INSERT INTO `" . $xoopsDB->prefix("jill_leave_cate") . "` (
-            `cate_title`, 
-            `cate_sort`, 
-            `enable`
+            `cate_title`,
+            `cate_sort`,
+            `enable`,
+            `force_pay`
         ) VALUES(
-            '{$cate_title}', 
-            '{$cate_sort}', 
-            '{$enable}'
+            '{$cate_title}',
+            '{$cate_sort}',
+            '{$enable}',
+            '{$force_pay}'
         )";
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
 
@@ -261,7 +265,7 @@ class Jill_leave_cate
 
         if (!empty($data_arr)) {
             //僅允許已知欄位，禁止呼叫端把使用者輸入當 key 傳入而注入任意欄位/SQL
-            $allowed_cols = ['cate_title', 'cate_sort', 'enable'];
+            $allowed_cols = ['cate_title', 'cate_sort', 'enable', 'force_pay'];
             $data_arr = array_intersect_key($data_arr, array_flip($allowed_cols));
 
             $col_arr = [];
@@ -280,11 +284,13 @@ class Jill_leave_cate
             $cate_title = Tools::filter('cate_title', $_POST['cate_title'] ?? '', 'write', self::$filter_arr);
             $cate_sort = Tools::filter('cate_sort', $_POST['cate_sort'] ?? 0, 'write', self::$filter_arr);
             $enable = Tools::filter('enable', $_POST['enable'] ?? 0, 'write', self::$filter_arr);
+            $force_pay = in_array($_POST['force_pay'] ?? '', ['self', 'school'], true) ? $_POST['force_pay'] : '';
 
             $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave_cate") . "` SET
-            `cate_title` = '{$cate_title}', 
-            `cate_sort` = '{$cate_sort}', 
-            `enable` = '{$enable}'
+            `cate_title` = '{$cate_title}',
+            `cate_sort` = '{$cate_sort}',
+            `enable` = '{$enable}',
+            `force_pay` = '{$force_pay}'
             WHERE 1 $and";
         }
         $xoopsDB->queryF($sql) or Utility::web_error($sql);

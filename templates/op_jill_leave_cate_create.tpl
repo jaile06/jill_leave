@@ -20,6 +20,25 @@
             </div>
         </div>
 
+        <!--鎖定支付方式：選此假別時，代課支付方式固定為指定選項，不可更改-->
+        <div class="col-md-2">
+            <{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY}>
+        </div>
+        <div class="col-md-10">
+            <div class="form-check form-check-inline pt-2">
+                <input type="radio" name="force_pay" id="force_pay_none" class="form-check-input" value="" <{if $force_pay|default:'' == ''}>checked="checked"<{/if}>>
+                <label class="form-check-label" for="force_pay_none"><{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY_NONE}></label>
+            </div>
+            <div class="form-check form-check-inline pt-2">
+                <input type="radio" name="force_pay" id="force_pay_self" class="form-check-input" value="self" <{if $force_pay|default:'' == 'self'}>checked="checked"<{/if}>>
+                <label class="form-check-label" for="force_pay_self"><{$smarty.const._MD_JILLLEAVE_PAY_SELF}></label>
+            </div>
+            <div class="form-check form-check-inline pt-2">
+                <input type="radio" name="force_pay" id="force_pay_school" class="form-check-input" value="school" <{if $force_pay|default:'' == 'school'}>checked="checked"<{/if}>>
+                <label class="form-check-label" for="force_pay_school"><{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL}></label>
+            </div>
+        </div>
+
         <!--啟用狀態-->
         <div class="col-md-2">
             <{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}>
@@ -34,6 +53,7 @@
                 <label class="form-check-label" for="enable_0">停用</label>
             </div>
         </div>
+
     </div>
 
     <div class="bar text-center">

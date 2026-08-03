@@ -4,7 +4,7 @@ $modversion = [];
 
 //---模組基本資訊---//
 $modversion['name']        = _MI_JILLLEAVE_NAME;
-$modversion['version']     = $_SESSION['xoops_version'] >= 20511 ? '1.0.1-Stable' : '1.0.1';
+$modversion['version']     = $_SESSION['xoops_version'] >= 20511 ? '1.0.2-Stable' : '1.0.2';
 $modversion['description'] = _MI_JILLLEAVE_DESC;
 $modversion['author']      = _MI_JILLLEAVE_AUTHOR;
 $modversion['credits']     = _MI_JILLLEAVE_CREDITS;
@@ -14,7 +14,7 @@ $modversion['image']       = "images/logo.png";
 $modversion['dirname']     = basename(__DIR__);
 
 //---模組狀態資訊---//
-$modversion['release_date']        = '2026-07-10';
+$modversion['release_date']        = '2026-08-03';
 $modversion['module_website_url']  = 'https://github.com/jaile06';
 $modversion['module_website_name'] = _MI_JILLLEAVE_AUTHOR_WEB;
 $modversion['module_status']       = 'release';

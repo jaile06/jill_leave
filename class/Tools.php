@@ -138,10 +138,13 @@ class Tools
     }
 
     // 權限檢查
+    // 失敗時導向模組首頁，不可用 $_SERVER['PHP_SELF']——當呼叫端本身就是被檢查的頁面（如 config.php
+    // 開頭直接呼叫 chk_is_adm）時，導回自己會造成「無權限→重載→無權限」無限迴圈
     public static function chk_is_adm($other = '', $id = '', $file = '', $line = '', $mode = '')
     {
         $id   = (int) $id;
         $file = str_replace('\\', '/', $file);
+        $index_url = XOOPS_URL . '/modules/jill_leave/index.php';
         //注意：不可用 PHP_SELF 判斷後台（可被 PATH_INFO 偽造），後台已於 admin/main.php 設定 session
         if (!empty($_SESSION['jill_leave_adm']) || ($other != '' && !empty($_SESSION[$other]))) {
             if (!empty($id) && $other !== '' && !empty($_SESSION[$other])) {
@@ -150,7 +153,7 @@ class Tools
                 } elseif ($mode == 'return') {
                     return false;
                 } else {
-                    redirect_header($_SERVER['PHP_SELF'], 3, "您對筆資料 ($id) 無操作權限 {$file} ($line)");
+                    redirect_header($index_url, 3, "您對筆資料 ($id) 無操作權限 {$file} ($line)");
                 }
             } else {
                 return true;
@@ -159,7 +162,7 @@ class Tools
             if ($mode == 'return') {
                 return false;
             }
-            redirect_header($_SERVER['PHP_SELF'], 3, "無操作權限 {$file} ($line)");
+            redirect_header($index_url, 3, "無操作權限 {$file} ($line)");
         }
     }
 

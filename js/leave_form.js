@@ -84,7 +84,27 @@
             $card.find('.type-radio[value="swap"]').prop('checked', true);
             apply_type($card, 'swap');
         }
+        apply_pay_lock($card);
         return $card;
+    }
+
+    // 依假別（cate_sn）鎖定支付方式：假別設有 force_pay 時，卡片的支付方式固定並停用切換
+    function apply_pay_lock($card) {
+        var lock = cfg.force_pay || '';
+        var $radios = $card.find('.pay-radio');
+        if (lock) {
+            $radios.filter('[value="' + lock + '"]').prop('checked', true);
+        }
+        $radios.prop('disabled', !!lock);
+    }
+
+    // 假別切換時，重新讀取該假別的 force_pay 並套用到所有卡片
+    function update_pay_lock() {
+        var $opt = $('#cate_sn').find('option:selected');
+        cfg.force_pay = $opt.data('forcePay') || '';
+        $container.children('.substitute-card').each(function () {
+            apply_pay_lock($(this));
+        });
     }
 
     // 依調代課類型切換面板顯示與支付方式欄位（型別 change 事件與程式強制設定共用）
@@ -615,6 +635,9 @@
         // 手動輸入日期（未經 My97 onpicked）也要連動重算卡片
         $('#start_date, #end_date').on('change', window.checkDates);
 
+        // 假別切換時連動鎖定支付方式（例如身心調適假固定為公費）
+        $('#cate_sn').on('change', update_pay_lock);
+
         // 在輸入欄按 Enter 不隱式送出表單，改為觸發 change（日期欄會連動重算卡片）
         $('#myForm').on('keydown', 'input', function (e) {
             if (e.key === 'Enter') {
@@ -632,7 +655,9 @@
             apply_advisor_mode();
         });
 
+        update_pay_lock();
         init_cards();
+        update_pay_lock(); // fill_card 可能回填舊資料的支付方式，鎖定假別需再次強制套用
         apply_advisor_mode();
     });
 })(jQuery);

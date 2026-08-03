@@ -22,5 +22,13 @@
     <li class="w2 vtitle"><{$smarty.const._MD_JILLLEAVE_CATE_ENABLE}></li>
     <li class="w8"><{if $enable == 1}>啟用<{else}>停用<{/if}></li>
 </ul>
+<ul>
+    <li class="w2 vtitle"><{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY}></li>
+    <li class="w8">
+        <{if $force_pay == 'self'}><{$smarty.const._MD_JILLLEAVE_PAY_SELF}>
+        <{elseif $force_pay == 'school'}><{$smarty.const._MD_JILLLEAVE_PAY_SCHOOL}>
+        <{else}><{$smarty.const._MD_JILLLEAVE_CATE_FORCE_PAY_NONE}><{/if}>
+    </li>
+</ul>
 </div>
 </div>
