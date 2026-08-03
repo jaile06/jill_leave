@@ -68,6 +68,7 @@ define('_MD_JILLLEAVE_MSG_NO_PERIOD', '尚未勾選代課節次');
 define('_MD_JILLLEAVE_MSG_NO_SUBJECT', '請輸入科目');
 define('_MD_JILLLEAVE_MSG_NO_TEACHER', '請輸入代課老師');
 define('_MD_JILLLEAVE_MSG_NO_GRADE_CLASS', '請選擇代課班級');
+define('_MD_JILLLEAVE_CHECK_PERIOD_TIP', '請勾選左側核取方塊以啟用該節次填寫欄位');
 
 //遺課處理方式（委託代課／自己補課／與他人調課）
 define('_MD_JILLLEAVE_HANDLE', '處理方式');

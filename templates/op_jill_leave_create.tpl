@@ -1,4 +1,39 @@
 <!--請假表單：套用 formValidator 驗證機制；代課卡片由 js/leave_form.js 依起訖日期動態生成-->
+<style>
+    /* 節次核取方塊視覺強化：加大尺寸、加深藍色邊框與發光對比，提升使用者視覺注意力 */
+    .period-check {
+        width: 1.35em !important;
+        height: 1.35em !important;
+        margin-top: 0.1em !important;
+        border: 2.5px solid #0d6efd !important;
+        cursor: pointer;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+        transition: all 0.15s ease-in-out;
+    }
+    .period-check:hover {
+        border-color: #0b5ed7 !important;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.4);
+    }
+    .period-check:checked {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.3);
+    }
+    /* 節次標題文字加粗與變色提示 */
+    .period-text {
+        font-weight: 700;
+        color: #0d6efd;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1.05rem;
+    }
+    /* 勾選啟用該節次時的整列背景高亮與左側藍條標示 */
+    .period-row-active {
+        background-color: #e7f1ff !important;
+        border-left: 4px solid #0d6efd !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+</style>
 <div class="container py-1">
 <form action="<{$smarty.server.PHP_SELF|escape}>" method="post" id="myForm">
     <!--請假者姓名（自動帶入登入者姓名，不可修改）-->
@@ -340,6 +375,7 @@ var LEAVE_FORM = {
     swap_teacher_text: '<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>',
     copy_first_day: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>',
     copy_first_day_tip: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>',
+    check_period_tip: '<{$smarty.const._MD_JILLLEAVE_CHECK_PERIOD_TIP}>',
     existing: <{$substitute_rows|@json_encode:15 nofilter}>,
     ajax_url: '<{$xoops_url}>/modules/jill_leave/index.php',
     exclude_sn: <{$sn|default:0}>,

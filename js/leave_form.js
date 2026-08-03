@@ -56,6 +56,14 @@
 
         var $hour_panel = $card.find('.hour-panel');
         var $swap_panel = $card.find('.swap-panel');
+
+        // 在節次面板頂部加入顯眼的勾選提示 Banner
+        if (cfg.check_period_tip) {
+            var tip_html = '<div class="alert alert-primary py-1 px-2 mb-2 small fw-bold"><i class="fa fa-hand-pointer me-1"></i> ' + cfg.check_period_tip + '</div>';
+            $hour_panel.append(tip_html);
+            $swap_panel.append(tip_html);
+        }
+
         $.each(cfg.periods || [], function (i, p) {
             var $row = $($.trim($('#period_row_tpl').html()));
             $row.attr('data-period', p);
@@ -171,6 +179,7 @@
         var use_input = $scope.find('.teacher-opt[value="input"]').is(':checked');
         $scope.find('.teacher-input').prop('disabled', !enabled || !use_input);
         if ($scope.hasClass('period-row')) {
+            $scope.toggleClass('period-row-active', enabled);
             apply_handle($scope);
         }
     }
