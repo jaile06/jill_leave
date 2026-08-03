@@ -9,6 +9,7 @@ require_once __DIR__ . '/header.php';
 $op     = Request::getString('op');
 $sn     = Request::getInt('sn');
 $cateSn = Request::getInt('cate_sn');
+$isSwap = Request::getInt('swap') > 0;
 
 /* ===== 1. AJAX API 優先攔截（不載入佈景） ===== */
 if ($op === 'update_status') {
@@ -29,7 +30,7 @@ $uid = Jill_leave::requireEditableUser();
 
 /* ===== 4. 核心 CRUD 路由 (僅登入且非學生執行，回傳解析後的 $op 供 footer.php 載入樣板) ===== */
 if ($uid > 0) {
-    $op = handleAction($op, $sn, $cateSn, $uid);
+    $op = handleAction($op, $sn, $cateSn, $uid, $isSwap);
 } else {
     // 未通過權限驗證，清空 $op 防止透過 URL 直接載入受保護的子樣板
     $op = '';
@@ -113,7 +114,7 @@ function handleHourConflictCheck(): void
         }
     }
 
-    $conflicts = Jill_leave_class::find_hour_conflicts($uid, $swap_slots, $exclude_sn);
+    $conflicts = Jill_leave_class::find_slot_conflicts($uid, $swap_slots, $exclude_sn);
     echo json_encode(['conflicts' => $conflicts]);
     exit;
 }
@@ -125,9 +126,10 @@ function handleHourConflictCheck(): void
  * @param int    $sn     請假單流水號
  * @param int    $cateSn 分類流水號
  * @param int    $uid    使用者 UID
+ * @param bool   $isSwap 是否為補調課單入口
  * @return string 解析與確定執行的 $op 動作名稱
  */
-function handleAction(string $op, int $sn, int $cateSn, int $uid): string
+function handleAction(string $op, int $sn, int $cateSn, int $uid, bool $isSwap = false): string
 {
     global $xoopsSecurity;
 
@@ -146,7 +148,7 @@ function handleAction(string $op, int $sn, int $cateSn, int $uid): string
 
         // 顯示新增請假單表單
         case 'jill_leave_create':
-            Jill_leave::create('', $cateSn);
+            Jill_leave::create('', $cateSn, $isSwap);
             return 'jill_leave_create';
 
         // 顯示編輯請假單表單

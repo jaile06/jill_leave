@@ -149,48 +149,43 @@ class Jill_leave_class
     }
 
     /**
-     * 查詢同一請假者的鐘點代課節次是否與補調課異動後節次重疊
+     * 查詢同一請假者名下是否已有節次佔用與傳入節次重疊
+     *
+     * 「佔用」不分請假類型：一個 (日期, 節次) 只能屬於一張單，來源有兩種——
+     * 該節本人請假不在（substitute_date + class_period），或該節是補調課異動後要來上課
+     * （subject JSON 內的 swap_date + swap_period）。JSON 在 PHP 端解析比對，
+     * 不依賴 MySQL JSON 函式（專案未用過，版本未知）。
      *
      * @param int   $uid         請假者 uid
-     * @param array $swap_slots  異動後節次，每個元素格式為 ['date' => 'yyyy-mm-dd', 'period' => '第N節']
+     * @param array $slots       待檢查節次，每個元素格式為 ['date' => 'yyyy-mm-dd', 'period' => '第N節']
      * @param int   $exclude_sn  編輯模式排除自身假單的 sn（新增時傳 0）
      * @return array 衝突資料 [{date, period, sn}, ...]
      */
-    public static function find_hour_conflicts(int $uid, array $swap_slots, int $exclude_sn = 0): array
+    public static function find_slot_conflicts(int $uid, array $slots, int $exclude_sn = 0): array
     {
         global $xoopsDB;
 
-        if (empty($swap_slots) || $uid <= 0) {
-            return [];
-        }
-
-        // 組裝 (substitute_date, class_period) IN (...) 條件
-        $pairs = [];
-        foreach ($swap_slots as $slot) {
-            $date   = $xoopsDB->escape(trim($slot['date'] ?? ''));
-            $period = $xoopsDB->escape(trim($slot['period'] ?? ''));
-            if ($date === '' || $period === '') {
-                continue;
+        $wanted = [];
+        foreach ($slots as $slot) {
+            $date   = trim((string) ($slot['date'] ?? ''));
+            $period = trim((string) ($slot['period'] ?? ''));
+            if ($date !== '' && $period !== '') {
+                $wanted["{$date}|{$period}"] = true;
             }
-            $pairs[] = "('{$date}', '{$period}')";
         }
-        if (empty($pairs)) {
+        if (empty($wanted) || $uid <= 0) {
             return [];
         }
 
-        $in_clause   = implode(', ', $pairs);
         $exclude_sql = $exclude_sn > 0 ? "AND l.`sn` != '{$exclude_sn}'" : '';
 
-        // 核心查詢：找出同一人其他假單中 type=hour 且日期＋節次重疊的紀錄
-        $sql = "SELECT s.`substitute_date`, c.`class_period`, l.`sn`
+        $sql = "SELECT s.`substitute_date`, c.`class_period`, c.`subject`, l.`sn`
                 FROM `" . $xoopsDB->prefix("jill_leave_class") . "` AS c
                 JOIN `" . $xoopsDB->prefix("jill_leave_substitute") . "` AS s ON c.`substitute_sn` = s.`substitute_sn`
                 JOIN `" . $xoopsDB->prefix("jill_leave") . "` AS l ON s.`sn` = l.`sn`
                 WHERE l.`uid` = '{$uid}'
-                  AND s.`type` = 'hour'
                   AND l.`status` != '2'
-                  {$exclude_sql}
-                  AND (s.`substitute_date`, c.`class_period`) IN ({$in_clause})";
+                  {$exclude_sql}";
 
         $result = $xoopsDB->query($sql);
         if (!$result) {
@@ -199,12 +194,21 @@ class Jill_leave_class
 
         $conflicts = [];
         while ($row = $xoopsDB->fetchArray($result)) {
-            $conflicts[] = [
-                'date'   => $row['substitute_date'],
-                'period' => $row['class_period'],
-                'sn'     => (int) $row['sn'],
-            ];
+            //本節「不在」的佔用
+            $away_key = trim($row['substitute_date']) . '|' . trim($row['class_period']);
+            if (isset($wanted[$away_key]) && !isset($conflicts[$away_key])) {
+                $conflicts[$away_key] = ['date' => $row['substitute_date'], 'period' => $row['class_period'], 'sn' => (int) $row['sn']];
+            }
+
+            //異動後「要來上課」的佔用
+            $decoded = self::decode_subject($row['subject']);
+            if ($decoded['handle'] !== 'substitute' && $decoded['swap_date'] !== '' && $decoded['swap_period'] !== '') {
+                $swap_key = $decoded['swap_date'] . '|' . $decoded['swap_period'];
+                if (isset($wanted[$swap_key]) && !isset($conflicts[$swap_key])) {
+                    $conflicts[$swap_key] = ['date' => $decoded['swap_date'], 'period' => $decoded['swap_period'], 'sn' => (int) $row['sn']];
+                }
+            }
         }
-        return $conflicts;
+        return array_values($conflicts);
     }
 }

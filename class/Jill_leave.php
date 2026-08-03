@@ -161,8 +161,9 @@ class Jill_leave
             $total = $PageBar['total'];
         }
 
-        //假別名稱對照表
+        //假別名稱對照表；0 為補調課單保留值，不在假別表中
         $cate_title_arr = Jill_leave_cate::get_all([], [], ['cate_sn', 'cate_title'], [], 'cate_sn', 'cate_title');
+        $cate_title_arr[0] = _MD_JILLLEAVE_TYPE_SWAP;
 
         $result = $xoopsDB->query($sql) or Utility::web_error($sql);
         $data_arr = [];
@@ -222,10 +223,10 @@ class Jill_leave
         $all['uid_name'] = Utility::get_name_by_uid($all['uid']);
         $xoopsTpl->assign('uid_name', $all['uid_name']);
 
-        //取得分類資料(jill_leave_cate)
-        $jill_leave_cate_arr = Jill_leave_cate::get(['cate_sn' => $all['cate_sn']]);
+        //取得分類資料(jill_leave_cate)；0 為補調課單保留值，不在假別表中
+        $jill_leave_cate_arr = ((int) $all['cate_sn'] === 0) ? [] : Jill_leave_cate::get(['cate_sn' => $all['cate_sn']]);
         $xoopsTpl->assign('jill_leave_cate_arr', $jill_leave_cate_arr);
-        $xoopsTpl->assign('cate_sn_title', $jill_leave_cate_arr['cate_title'] ?? '');
+        $xoopsTpl->assign('cate_sn_title', ((int) $all['cate_sn'] === 0) ? _MD_JILLLEAVE_TYPE_SWAP : ($jill_leave_cate_arr['cate_title'] ?? ''));
 
         //顯示用欄位
         $all['status_text'] = self::status_text($all['status']);
@@ -309,12 +310,18 @@ class Jill_leave
     }
 
     //jill_leave 編輯表單
-    public static function create($sn = '', $cate_sn = '')
+    public static function create($sn = '', $cate_sn = '', $is_swap = false)
     {
         global $xoopsDB, $xoopsTpl, $xoopsUser;
 
         //抓取預設值
         $jill_leave = (!empty($sn)) ? self::get(['sn' => $sn], [], 'edit') : [];
+
+        //編輯既有補調課單（cate_sn=0）時自動沿用補調課模式，不需靠 URL 參數
+        if (!empty($jill_leave) && (int) ($jill_leave['cate_sn'] ?? -1) === 0) {
+            $is_swap = true;
+        }
+        $xoopsTpl->assign('is_swap', $is_swap);
 
         //僅管理者或本人可編輯
         if (!empty($jill_leave)) {
@@ -336,8 +343,8 @@ class Jill_leave
         $def['sn'] = $sn;
         $def['uid'] = $user_uid;
         $def['leavers'] = $xoopsUser ? Utility::get_name_by_uid($user_uid) : '';
-        // 預設假別為排序第一個
-        $def['cate_sn'] = $cate_sn ?: ($cate_sn_options_array[0]['cate_sn'] ?? '');
+        // 補調課單固定 cate_sn=0（不在假別表中）；否則預設假別為排序第一個
+        $def['cate_sn'] = $is_swap ? 0 : ($cate_sn ?: ($cate_sn_options_array[0]['cate_sn'] ?? ''));
         $def['is_advisor'] = 0;
         $def['grade_class'] = '';
         $def['start_date'] = date("Y-m-d");
@@ -409,11 +416,69 @@ class Jill_leave
     }
 
     //檢查假別是否存在，不存在則導轉並中止（避免前端被繞過時寫入無效的 cate_sn）
+    //cate_sn = 0 為補調課單的保留值，不在 jill_leave_cate 表中，屬合法值直接放行
     private static function chk_cate_exists($cate_sn, $redirect_url)
     {
+        if ((int) $cate_sn === 0) {
+            return;
+        }
         $cate = Jill_leave_cate::get(['cate_sn' => (int) $cate_sn], [], '');
         if (empty($cate)) {
             redirect_header($redirect_url, 3, _MD_JILLLEAVE_NO_CONDITION);
+        }
+    }
+
+    //掃描 $_POST 代課平行陣列，收集本次要佔用的節次（本人不在的節次＋補調課異動後要來上課的節次），供衝突檢查使用
+    private static function collect_post_slots(): array
+    {
+        if (empty($_POST['substitute_date']) || !is_array($_POST['substitute_date'])) {
+            return [];
+        }
+
+        $dates = array_slice($_POST['substitute_date'], 0, 500);
+        $parallel_keys = ['class_period', 'handle', 'swap_date', 'swap_period'];
+        $post = [];
+        foreach ($parallel_keys as $key) {
+            $post[$key] = is_array($_POST[$key] ?? null) ? $_POST[$key] : [];
+        }
+
+        $start_date = trim((string) ($_POST['start_date'] ?? ''));
+        $end_date = trim((string) ($_POST['end_date'] ?? ''));
+
+        $slots = [];
+        foreach ($dates as $i => $date) {
+            $date = trim((string) $date);
+            if ($date === '' || ($start_date !== '' && $end_date !== '' && ($date < $start_date || $date > $end_date))) {
+                continue;
+            }
+
+            $period = trim((string) ($post['class_period'][$i] ?? ''));
+            if ($period !== '') {
+                $slots[] = ['date' => $date, 'period' => $period];
+            }
+
+            $handle = trim((string) ($post['handle'][$i] ?? ''));
+            if ($handle !== '' && $handle !== 'substitute') {
+                $sw_date = trim((string) ($post['swap_date'][$i] ?? ''));
+                $sw_period = trim((string) ($post['swap_period'][$i] ?? ''));
+                if ($sw_date !== '' && $sw_period !== '') {
+                    $slots[] = ['date' => $sw_date, 'period' => $sw_period];
+                }
+            }
+        }
+        return $slots;
+    }
+
+    //節次級衝突檢查：不通過則導轉並中止
+    private static function chk_slot_conflicts(int $uid, int $exclude_sn, string $redirect_url): void
+    {
+        $slots = self::collect_post_slots();
+        if (empty($slots)) {
+            return;
+        }
+        $conflicts = Jill_leave_class::find_slot_conflicts($uid, $slots, $exclude_sn);
+        if (!empty($conflicts)) {
+            redirect_header($redirect_url, 5, _MD_JILLLEAVE_HOUR_CONFLICT_SAVE_FAIL);
         }
     }
 
@@ -432,7 +497,8 @@ class Jill_leave
 
         // 請假者姓名強制從登入者取得，不接受前端 POST 值
         $leavers = Tools::filter('leavers', Utility::get_name_by_uid($xoopsUser->uid()), 'write', self::$filter_arr);
-        $cate_sn = Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
+        //補調課單由 swap 隱藏欄位決定，不信任前端傳來的 cate_sn（0 在 PHP 為 falsy，不能用 ?: 判斷）
+        $cate_sn = !empty($_POST['swap']) ? 0 : Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
         $is_advisor = Tools::filter('is_advisor', $_POST['is_advisor'] ?? 0, 'write', self::$filter_arr);
         $grade_class = Tools::filter('grade_class', $_POST['grade_class'] ?? '', 'write', self::$filter_arr);
         $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
@@ -444,16 +510,23 @@ class Jill_leave
         //一般使用者僅能建立自己的假單且狀態固定為待審核，管理者可指定狀態
         $uid = ($xoopsUser) ? $xoopsUser->uid() : 0;
 
-        //檢查同一人是否在相同日期區間已有假單（日期區間重疊判斷；已駁回的假單不計入）
-        $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
-            WHERE `uid` = '{$uid}'
-            AND `start_date` <= '{$end_date}'
-            AND `end_date` >= '{$start_date}'
-            AND `status` != '2'";
-        list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
-        if ($dup_count > 0) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
+        //補調課單（cate_sn=0）的代課日期必然落在請假日內，整日區間重疊對它無意義，改用下方節次級檢查
+        if ((int) $cate_sn !== 0) {
+            //檢查同一人是否在相同日期區間已有假單（日期區間重疊判斷；已駁回的假單不計入）
+            $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
+                WHERE `uid` = '{$uid}'
+                AND `start_date` <= '{$end_date}'
+                AND `end_date` >= '{$start_date}'
+                AND `status` != '2'";
+            list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
+            if ($dup_count > 0) {
+                redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
+            }
         }
+
+        //節次級衝突檢查：本次要佔用的節次是否與同一人其他有效假單重疊（涵蓋請假與補調課雙向）
+        self::chk_slot_conflicts((int) $uid, 0, XOOPS_URL . '/modules/jill_leave/index.php');
+
         $status = !empty($_SESSION['jill_leave_adm']) ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
         $create_date = date("Y-m-d H:i:s", xoops_getUserTimestamp(time()));
         $update_date = date("Y-m-d H:i:s", xoops_getUserTimestamp(time()));
@@ -543,7 +616,8 @@ class Jill_leave
 
         // 請假者姓名強制從原始資料取得，不接受前端 POST 值
         $leavers = Tools::filter('leavers', $old['leavers'] ?? Utility::get_name_by_uid($xoopsUser->uid()), 'write', self::$filter_arr);
-        $cate_sn = Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
+        //補調課單由 swap 隱藏欄位決定，不信任前端傳來的 cate_sn（0 在 PHP 為 falsy，不能用 ?: 判斷）
+        $cate_sn = !empty($_POST['swap']) ? 0 : Tools::filter('cate_sn', $_POST['cate_sn'] ?? 0, 'write', self::$filter_arr);
         $is_advisor = Tools::filter('is_advisor', $_POST['is_advisor'] ?? 0, 'write', self::$filter_arr);
         $grade_class = Tools::filter('grade_class', $_POST['grade_class'] ?? '', 'write', self::$filter_arr);
         $grade_class = $is_advisor ? $grade_class : ''; //科任無導師班級，一律清空避免殘留
@@ -555,16 +629,21 @@ class Jill_leave
         //更新時檢查日期重疊（排除自身 sn；已駁回的假單不計入）
         $self_sn = (int) ($where_arr['sn'] ?? 0);
         $uid_chk = (int) $old['uid'];
-        $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
-            WHERE `uid` = '{$uid_chk}'
-            AND `start_date` <= '{$end_date}'
-            AND `end_date` >= '{$start_date}'
-            AND `sn` != '{$self_sn}'
-            AND `status` != '2'";
-        list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
-        if ($dup_count > 0) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn, 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
+        if ((int) $cate_sn !== 0) {
+            $chk_sql = "SELECT COUNT(*) FROM `" . $xoopsDB->prefix("jill_leave") . "`
+                WHERE `uid` = '{$uid_chk}'
+                AND `start_date` <= '{$end_date}'
+                AND `end_date` >= '{$start_date}'
+                AND `sn` != '{$self_sn}'
+                AND `status` != '2'";
+            list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
+            if ($dup_count > 0) {
+                redirect_header(XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn, 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
+            }
         }
+
+        //節次級衝突檢查（排除自身 sn）
+        self::chk_slot_conflicts($uid_chk, $self_sn, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn);
 
         //一般使用者更新後回到待審核，管理者可指定狀態
         $status = !empty($_SESSION['jill_leave_adm']) ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
@@ -626,35 +705,7 @@ class Jill_leave
         $start_date = trim((string) ($_POST['start_date'] ?? ''));
         $end_date = trim((string) ($_POST['end_date'] ?? ''));
 
-        //========== 補調課異動後節次與鐘點請假衝突二次驗證 ==========
-        // 在 INSERT 之前先掃一遍平行陣列，收集所有非委託代課的異動後日期＋節次
-        $swap_slots_to_check = [];
-        foreach ($substitute_dates as $i => $chk_date) {
-            $chk_date_trimmed = trim($chk_date);
-            if ($start_date !== '' && $end_date !== '' && ($chk_date_trimmed < $start_date || $chk_date_trimmed > $end_date)) {
-                continue;
-            }
-            $chk_handle = trim((string) ($post['handle'][$i] ?? ''));
-            if ($chk_handle !== '' && $chk_handle !== 'substitute') {
-                $sw_date   = trim((string) ($post['swap_date'][$i] ?? ''));
-                $sw_period = trim((string) ($post['swap_period'][$i] ?? ''));
-                if ($sw_date !== '' && $sw_period !== '') {
-                    $swap_slots_to_check[] = ['date' => $sw_date, 'period' => $sw_period];
-                }
-            }
-        }
-        if (!empty($swap_slots_to_check)) {
-            // 取得請假者 uid（從主表查回）
-            $leave_data = self::get(['sn' => $sn], [], '');
-            $leave_uid = (int) ($leave_data['uid'] ?? 0);
-            if ($leave_uid > 0) {
-                $conflicts = Jill_leave_class::find_hour_conflicts($leave_uid, $swap_slots_to_check, $sn);
-                if (!empty($conflicts)) {
-                    return false; // 衝突→觸發既有 rollback 機制
-                }
-            }
-        }
-        //========== 衝突預檢結束 ==========
+        //節次級衝突檢查已在 store()/update() 寫入主表前完成（見 chk_slot_conflicts），此處不再重複
 
         foreach ($substitute_dates as $i => $date) {
             $date = $xoopsDB->escape(trim($date));

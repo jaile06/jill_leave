@@ -84,6 +84,9 @@
             <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-info">
                 <i class="fa fa-plus"></i> <{$smarty.const._TAD_ADD}>
             </a>
+            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create&swap=1" class="btn btn-outline-info">
+                <i class="fa fa-right-left"></i> <{$smarty.const._MD_JILLLEAVE_APPLY_SWAP}>
+            </a>
         </div>
     <{/if}>
 
@@ -93,6 +96,9 @@
         <{if $smarty.session.now_user|default:false}>
             <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create" class="btn btn-info">
                 <i class="fa fa-plus"></i> <{$smarty.const._TAD_ADD}>
+            </a>
+            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_create&swap=1" class="btn btn-outline-info">
+                <i class="fa fa-right-left"></i> <{$smarty.const._MD_JILLLEAVE_APPLY_SWAP}>
             </a>
         <{else}>
             <h3><{$smarty.const._TAD_EMPTY}></h3>

@@ -68,7 +68,24 @@
             $srow.find('.period-text').text(p);
             $swap_panel.append($srow);
         });
+
+        // 補調課單模式：整張單固定為補調課，不需選擇調代課類型與支付方式
+        // 卡片此時尚未插入 DOM，change 事件委派抓不到，直接呼叫 apply_type
+        if (cfg.is_swap) {
+            $card.find('.type-select-wrap').addClass('d-none');
+            $card.find('.type-radio[value="swap"]').prop('checked', true);
+            apply_type($card, 'swap');
+        }
         return $card;
+    }
+
+    // 依調代課類型切換面板顯示與支付方式欄位（型別 change 事件與程式強制設定共用）
+    function apply_type($card, val) {
+        $card.find('.daily-panel').toggleClass('d-none', val !== 'daily');
+        $card.find('.hour-panel').toggleClass('d-none', val !== 'hour');
+        $card.find('.swap-panel').toggleClass('d-none', val !== 'swap');
+        // 補調課不涉及代課鐘點費，隱藏支付方式
+        $card.find('.pay-method-wrap').toggleClass('d-none', val === 'swap');
     }
 
     // 更新「同第一天」按鈕顯示狀態：第一張隱藏，其餘顯示
@@ -435,13 +452,7 @@
     function bind_events() {
         // 調代課類型切換 (daily / hour / swap)
         $container.on('change', '.type-radio', function () {
-            var val = $(this).val();
-            var $card = $(this).closest('.substitute-card');
-            $card.find('.daily-panel').toggleClass('d-none', val !== 'daily');
-            $card.find('.hour-panel').toggleClass('d-none', val !== 'hour');
-            $card.find('.swap-panel').toggleClass('d-none', val !== 'swap');
-            // 補調課不涉及代課鐘點費，隱藏支付方式
-            $card.find('.pay-method-wrap').toggleClass('d-none', val === 'swap');
+            apply_type($(this).closest('.substitute-card'), $(this).val());
         });
 
         // 勾選節次才開放該列欄位

@@ -49,6 +49,7 @@ define('_MD_JILLLEAVE_PAY_NONE', '無');
 define('_MD_JILLLEAVE_TYPE_DAILY', '日薪');
 define('_MD_JILLLEAVE_TYPE_HOUR', '鐘點');
 define('_MD_JILLLEAVE_TYPE_SWAP', '補調課');
+define('_MD_JILLLEAVE_APPLY_SWAP', '申請補調課');
 
 //代課批次表單
 define('_MD_JILLLEAVE_SUBSTITUTE_INFO', '代課資訊');
@@ -77,7 +78,7 @@ define('_MD_JILLLEAVE_CHANGED', '異動後');
 define('_MD_JILLLEAVE_CHANGED_DATE', '異動後日期');
 define('_MD_JILLLEAVE_CHANGED_PERIOD', '異動後節次');
 define('_MD_JILLLEAVE_SWAP_SUBJECT', '對調科目');
-define('_MD_JILLLEAVE_SWAP_TEACHER', '對調教師');
+define('_MD_JILLLEAVE_SWAP_TEACHER', '對調教師／班級');
 define('_MD_JILLLEAVE_MSG_NO_CHANGED', '請選擇異動後日期與節次');
 define('_MD_JILLLEAVE_MSG_NO_SWAP_TEACHER', '請輸入對調教師');
 define('_MD_JILLLEAVE_MSG_NO_SWAP_SUBJECT', '請輸入對調科目');

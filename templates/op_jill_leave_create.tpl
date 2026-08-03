@@ -50,15 +50,24 @@
         </div>
     </div>
 
-    <!--假別-->
-    <div class="form-floating mb-3">
-        <select name="cate_sn" id="cate_sn" class="form-select validate[required]" size="1">
-            <{foreach from=$cate_sn_options item=opt}>
-                <option value="<{$opt.cate_sn}>" <{if $cate_sn==$opt.cate_sn}>selected<{/if}>><{$opt.cate_title}></option>
-            <{/foreach}>
-        </select>
-        <label for="cate_sn"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>
-    </div>
+    <!--假別：補調課單固定為補調課，不需選擇假別-->
+    <{if $is_swap|default:false}>
+        <input type="hidden" name="swap" value="1">
+        <input type="hidden" name="cate_sn" value="0">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" value="<{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}>" disabled>
+            <label><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>
+        </div>
+    <{else}>
+        <div class="form-floating mb-3">
+            <select name="cate_sn" id="cate_sn" class="form-select validate[required]" size="1">
+                <{foreach from=$cate_sn_options item=opt}>
+                    <option value="<{$opt.cate_sn}>" <{if $cate_sn==$opt.cate_sn}>selected<{/if}>><{$opt.cate_title}></option>
+                <{/foreach}>
+            </select>
+            <label for="cate_sn"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>
+        </div>
+    <{/if}>
 
     <!--起始日期 / 結束日期（選定後自動生成代課卡片）-->
     <div class="row">
@@ -136,8 +145,8 @@
     <div class="card mb-3 substitute-card">
         <div class="card-header d-flex flex-wrap align-items-center gap-3">
             <strong class="me-auto"><i class="fa fa-calendar"></i> <span class="substitute-date-text"></span></strong>
-            <!--調代課類型（決定支付方式是否顯示，固定放前面，避免支付方式隱藏時版面跳動）-->
-            <div class="d-inline-flex align-items-center">
+            <!--調代課類型（決定支付方式是否顯示，固定放前面，避免支付方式隱藏時版面跳動）；補調課單模式下固定為補調課，此區塊由 JS 隱藏-->
+            <div class="d-inline-flex align-items-center type-select-wrap">
                 <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></span>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="daily" checked> <{$smarty.const._MD_JILLLEAVE_TYPE_DAILY}></label>
@@ -333,7 +342,8 @@ var LEAVE_FORM = {
     copy_first_day_tip: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>',
     existing: <{$substitute_rows|@json_encode:15 nofilter}>,
     ajax_url: '<{$xoops_url}>/modules/jill_leave/index.php',
-    exclude_sn: <{$sn|default:0}>
+    exclude_sn: <{$sn|default:0}>,
+    is_swap: <{if $is_swap|default:false}>true<{else}>false<{/if}>
 };
 </script>
 <script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$smarty.now}>"></script>

@@ -36,8 +36,9 @@ if (empty($jill_leave)) {
 
 Tools::chk_own($jill_leave['uid']);
 
-$jill_leave_cate = Jill_leave_cate::get(['cate_sn' => $jill_leave['cate_sn']], [], '');
-$cate_title = $jill_leave_cate['cate_title'] ?? '';
+//0 為補調課單保留值，不在假別表中
+$jill_leave_cate = ((int) $jill_leave['cate_sn'] === 0) ? [] : Jill_leave_cate::get(['cate_sn' => $jill_leave['cate_sn']], [], '');
+$cate_title = ((int) $jill_leave['cate_sn'] === 0) ? _MD_JILLLEAVE_TYPE_SWAP : ($jill_leave_cate['cate_title'] ?? '');
 
 // 取得代課明細（已含 display_class 解析；escape=false 同上，避免 PDF 顯示雙重轉義）
 $substitutes = Jill_leave_substitute::get_all_by_leave($sn, false);
@@ -214,15 +215,15 @@ $h1 = 5;
 $pdf->Cell($c_date + $c_week + $c_period + $c_subj + $c_class, $h1, "請假期間課程", 1, 0, 'C');
 // 1.委託他人代課（僅在有 substitute 時顯示）
 if ($has_substitute) {
-    $pdf->Cell($c_sub_pay + $c_sub_tch, $h1, "1. 委託他人代課方式", 1, 0, 'C');
+    $pdf->Cell($c_sub_pay + $c_sub_tch, $h1, "委託他人代課方式", 1, 0, 'C');
 }
 // 2.自己補課（僅在有 makeup 時顯示）
 if ($has_makeup) {
-    $pdf->Cell($c_mk_date + $c_mk_per, $h1, "2. 已補課方式", 1, 0, 'C');
+    $pdf->Cell($c_mk_date + $c_mk_per, $h1, "已補課方式", 1, 0, 'C');
 }
 // 3.與他人調課（僅在有 swap 時顯示）
 if ($has_swap) {
-    $pdf->Cell($c_sw_date + $c_sw_per + $c_sw_tch, $h1, "3. 本人調課方式", 1, 0, 'C');
+    $pdf->Cell($c_sw_date + $c_sw_per + $c_sw_tch, $h1, "本人調課方式", 1, 0, 'C');
 }
 $pdf->Ln();
 
@@ -239,12 +240,12 @@ if ($has_substitute) {
 }
 if ($has_makeup) {
     $pdf->Cell($c_mk_date,$h2, "補課日期",1, 0, 'C');
-    $pdf->Cell($c_mk_per, $h2, "節次班",  1, 0, 'C');
+    $pdf->Cell($c_mk_per, $h2, "節次",  1, 0, 'C');
 }
 if ($has_swap) {
     $pdf->Cell($c_sw_date,$h2, "調課日期",1, 0, 'C');
-    $pdf->Cell($c_sw_per, $h2, "節次班",  1, 0, 'C');
-    $pdf->Cell($c_sw_tch, $h2, "對調教師/科目", 1, 0, 'C');
+    $pdf->Cell($c_sw_per, $h2, "節次",  1, 0, 'C');
+    $pdf->Cell($c_sw_tch, $h2, "對調教師/班級/科目", 1, 0, 'C');
 }
 $pdf->Ln();
 
