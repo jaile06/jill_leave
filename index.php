@@ -1,6 +1,7 @@
 <?php
 use Xmf\Request;
 use XoopsModules\Jill_leave\Jill_leave;
+use XoopsModules\Jill_leave\Jill_leave_class;
 
 /*----------- 引入基礎設定與檔頭 -----------*/
 require_once __DIR__ . '/header.php';
@@ -12,6 +13,11 @@ $cateSn = Request::getInt('cate_sn');
 /* ===== 1. AJAX API 優先攔截（不載入佈景） ===== */
 if ($op === 'update_status') {
     handleStatusUpdate($sn);
+}
+
+/* ===== 1-1. 補調課異動後節次與鐘點請假衝突檢查 AJAX API ===== */
+if ($op === 'check_hour_conflict') {
+    handleHourConflictCheck();
 }
 
 /* ===== 2. 載入佈景頁首 ===== */
@@ -70,6 +76,45 @@ function handleStatusUpdate(int $sn): void
         'success'     => $success,
         'status_text' => Jill_leave::status_text($status),
     ]);
+    exit;
+}
+
+/**
+ * 處理補調課異動後節次與鐘點請假衝突檢查 AJAX 請求
+ *
+ * 接收 POST 參數：
+ * - swap_slots[]：格式 '日期|節次'
+ * - exclude_sn：編輯模式排除自身假單 sn（可選）
+ *
+ * 回傳 JSON：{ conflicts: [{date, period, sn}, ...] }
+ */
+function handleHourConflictCheck(): void
+{
+    global $xoopsUser, $xoopsLogger;
+    $xoopsLogger->activated = false;
+    header('Content-Type: application/json; charset=utf-8');
+
+    // 須為登入使用者
+    if (empty($xoopsUser)) {
+        echo json_encode(['conflicts' => []]);
+        exit;
+    }
+
+    $uid = (int) $xoopsUser->uid();
+    $exclude_sn = (int) ($_POST['exclude_sn'] ?? 0);
+    $raw_slots = is_array($_POST['swap_slots'] ?? null) ? $_POST['swap_slots'] : [];
+
+    // 解析 '日期|節次' 格式
+    $swap_slots = [];
+    foreach ($raw_slots as $slot_str) {
+        $parts = explode('|', (string) $slot_str, 2);
+        if (count($parts) === 2 && trim($parts[0]) !== '' && trim($parts[1]) !== '') {
+            $swap_slots[] = ['date' => trim($parts[0]), 'period' => trim($parts[1])];
+        }
+    }
+
+    $conflicts = Jill_leave_class::find_hour_conflicts($uid, $swap_slots, $exclude_sn);
+    echo json_encode(['conflicts' => $conflicts]);
     exit;
 }
 

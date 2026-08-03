@@ -324,13 +324,16 @@ var LEAVE_FORM = {
         no_changed: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_CHANGED}>',
         no_swap_teacher: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_TEACHER}>',
         no_swap_subject: '<{$smarty.const._MD_JILLLEAVE_MSG_NO_SWAP_SUBJECT}>',
-        conflict_period: '<{$smarty.const._MD_JILLLEAVE_MSG_CONFLICT_PERIOD}>'
+        conflict_period: '<{$smarty.const._MD_JILLLEAVE_MSG_CONFLICT_PERIOD}>',
+        hour_conflict: '<{$smarty.const._MD_JILLLEAVE_MSG_HOUR_CONFLICT}>'
     },
     teacher_text: '<{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}>',
     swap_teacher_text: '<{$smarty.const._MD_JILLLEAVE_SWAP_TEACHER}>',
     copy_first_day: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>',
     copy_first_day_tip: '<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>',
-    existing: <{$substitute_rows|@json_encode:15 nofilter}>
+    existing: <{$substitute_rows|@json_encode:15 nofilter}>,
+    ajax_url: '<{$xoops_url}>/modules/jill_leave/index.php',
+    exclude_sn: <{$sn|default:0}>
 };
 </script>
 <script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$smarty.now}>"></script>

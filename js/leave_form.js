@@ -469,14 +469,96 @@
         });
     }
 
+    // 從已序列化的隱藏欄位中收集所有補調課的異動後日期＋節次
+    function collect_swap_slots() {
+        var $box = $('#substitute_hidden');
+        var slots = [];
+        $box.find('input[name="swap_date[]"]').each(function (i) {
+            var sw_date = $(this).val();
+            var sw_period = $box.find('input[name="swap_period[]"]').eq(i).val();
+            if (sw_date && sw_period) {
+                slots.push(sw_date + '|' + sw_period);
+            }
+        });
+        return slots;
+    }
+
+    // AJAX 查詢異動後節次是否與同一人的鐘點請假節次衝突
+    function check_hour_conflict(callback) {
+        var slots = collect_swap_slots();
+        // 沒有補調課資料，直接通過
+        if (slots.length === 0 || !cfg.ajax_url) {
+            callback(true);
+            return;
+        }
+
+        var post_data = {
+            op: 'check_hour_conflict',
+            exclude_sn: cfg.exclude_sn || 0
+        };
+        // jQuery $.post 傳陣列的方式
+        $.each(slots, function (i, slot) {
+            post_data['swap_slots[' + i + ']'] = slot;
+        });
+
+        $.post(cfg.ajax_url, post_data, function (resp) {
+            if (resp && resp.conflicts && resp.conflicts.length > 0) {
+                // 組裝衝突訊息並告警
+                var msgs = [];
+                $.each(resp.conflicts, function (i, c) {
+                    msgs.push(cfg.msg.hour_conflict
+                        .replace('{date}', c.date)
+                        .replace('{period}', c.period)
+                        .replace('{sn}', c.sn));
+                });
+                alert(msgs.join('\n'));
+                callback(false);
+            } else {
+                callback(true);
+            }
+        }, 'json').fail(function () {
+            // AJAX 失敗時不阻擋送出（降級處理，後端仍有二次驗證）
+            callback(true);
+        });
+    }
+
+    var submitting = false; // 防止重複送出
+
     function bind_submit() {
-        $('#myForm').on('submit', function () {
+        $('#myForm').on('submit', function (e) {
             // 合併年級＋班級寫入 grade_class
             var grade = $('#grade').val() || '';
             var classroom = $('#classroom').val() || '';
             $('#grade_class').val(grade && classroom ? grade + '年' + classroom + '班' : '');
 
-            return serialize_cards();
+            // 若已通過衝突檢查（submitting = true），直接放行
+            if (submitting) {
+                return true;
+            }
+
+            // 同步驗證（欄位必填、跨卡片衝堂）
+            if (!serialize_cards()) {
+                return false;
+            }
+
+            // 非同步 AJAX 衝突檢查
+            e.preventDefault();
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            $btn.prop('disabled', true);
+
+            check_hour_conflict(function (pass) {
+                if (pass) {
+                    submitting = true;
+                    $form[0].submit(); // 原生 submit，不再觸發 jQuery handler
+                } else {
+                    // 衝突→清空隱藏欄位，讓使用者修改
+                    $('#substitute_hidden').empty();
+                    $btn.prop('disabled', false);
+                }
+            });
+
+            return false;
         });
     }
 

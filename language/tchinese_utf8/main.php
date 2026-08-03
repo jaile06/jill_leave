@@ -83,6 +83,10 @@ define('_MD_JILLLEAVE_MSG_NO_SWAP_TEACHER', '請輸入對調教師');
 define('_MD_JILLLEAVE_MSG_NO_SWAP_SUBJECT', '請輸入對調科目');
 define('_MD_JILLLEAVE_MSG_CONFLICT_PERIOD', '{date} 第 {period} 節已重複（衝堂），請重新選擇異動後節次');
 
+//補調課異動後節次與鐘點請假衝突告警
+define('_MD_JILLLEAVE_MSG_HOUR_CONFLICT', '異動後節次與鐘點請假衝突：{date} {period}（假單編號 {sn}），該節已安排鐘點代課，請調整異動後節次');
+define('_MD_JILLLEAVE_HOUR_CONFLICT_SAVE_FAIL', '儲存失敗：異動後節次與鐘點請假節次衝突，請修正後重新送出');
+
 //核章欄（僅列印用，不寫入資料庫）
 define('_MD_JILLLEAVE_SIGN_TEACHER', '請假教師');
 define('_MD_JILLLEAVE_SIGN_GROUP_LEADER', '教學組長');

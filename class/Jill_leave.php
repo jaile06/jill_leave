@@ -608,6 +608,36 @@ class Jill_leave
         $start_date = trim((string) ($_POST['start_date'] ?? ''));
         $end_date = trim((string) ($_POST['end_date'] ?? ''));
 
+        //========== 補調課異動後節次與鐘點請假衝突二次驗證 ==========
+        // 在 INSERT 之前先掃一遍平行陣列，收集所有非委託代課的異動後日期＋節次
+        $swap_slots_to_check = [];
+        foreach ($substitute_dates as $i => $chk_date) {
+            $chk_date_trimmed = trim($chk_date);
+            if ($start_date !== '' && $end_date !== '' && ($chk_date_trimmed < $start_date || $chk_date_trimmed > $end_date)) {
+                continue;
+            }
+            $chk_handle = trim((string) ($post['handle'][$i] ?? ''));
+            if ($chk_handle !== '' && $chk_handle !== 'substitute') {
+                $sw_date   = trim((string) ($post['swap_date'][$i] ?? ''));
+                $sw_period = trim((string) ($post['swap_period'][$i] ?? ''));
+                if ($sw_date !== '' && $sw_period !== '') {
+                    $swap_slots_to_check[] = ['date' => $sw_date, 'period' => $sw_period];
+                }
+            }
+        }
+        if (!empty($swap_slots_to_check)) {
+            // 取得請假者 uid（從主表查回）
+            $leave_data = self::get(['sn' => $sn], [], '');
+            $leave_uid = (int) ($leave_data['uid'] ?? 0);
+            if ($leave_uid > 0) {
+                $conflicts = Jill_leave_class::find_hour_conflicts($leave_uid, $swap_slots_to_check, $sn);
+                if (!empty($conflicts)) {
+                    return false; // 衝突→觸發既有 rollback 機制
+                }
+            }
+        }
+        //========== 衝突預檢結束 ==========
+
         foreach ($substitute_dates as $i => $date) {
             $date = $xoopsDB->escape(trim($date));
             if ($start_date !== '' && $end_date !== '' && ($date < $start_date || $date > $end_date)) {
