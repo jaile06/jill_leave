@@ -57,9 +57,9 @@
         var $hour_panel = $card.find('.hour-panel');
         var $swap_panel = $card.find('.swap-panel');
 
-        // 在節次面板頂部加入顯眼的勾選提示 Banner
+        // 在節次面板頂部加入顯眼的勾選提示 Banner（使用 FA4/5/6 完全相容圖示類別）
         if (cfg.check_period_tip) {
-            var tip_html = '<div class="alert alert-primary py-1 px-2 mb-2 small fw-bold"><i class="fa fa-hand-pointer me-1"></i> ' + cfg.check_period_tip + '</div>';
+            var tip_html = '<div class="alert alert-primary py-1 px-2 mb-2 small fw-bold"><i class="fa fa-info-circle me-1"></i><i class="fa fa-check-square-o me-1"></i> ' + cfg.check_period_tip + '</div>';
             $hour_panel.append(tip_html);
             $swap_panel.append(tip_html);
         }

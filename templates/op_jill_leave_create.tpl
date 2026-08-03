@@ -189,7 +189,9 @@
                 <div class="form-check form-check-inline">
                     <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="hour"> <{$smarty.const._MD_JILLLEAVE_TYPE_HOUR}></label>
                 </div>
-                <div class="form-check form-check-inline">
+                <!--補調課單模式以外不提供此選項：補調課只能透過「申請補調課」整張單申請，一般請假卡片不混用；
+                    仍保留 input 元素（僅視覺隱藏）以相容編輯舊資料時可能存在的既有補調課節次列-->
+                <div class="form-check form-check-inline <{if !($is_swap|default:false)}>d-none<{/if}>">
                     <label class="form-check-label"><input type="radio" class="form-check-input type-radio" value="swap"> <{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}></label>
                 </div>
             </div>
