@@ -233,9 +233,27 @@ class Jill_leave
         $xoopsTpl->assign('status_text', $all['status_text']);
         $xoopsTpl->assign('is_advisor_text', $all['is_advisor_text']);
 
-        //取得代課資訊（含節次明細）
+        // 取得代課資訊（含節次明細）
         $substitutes = Jill_leave_substitute::get_all_by_leave($all['sn']);
         $xoopsTpl->assign('substitutes', $substitutes);
+
+        // 檢查該請假單是否有任何補調課或異動資訊，若無則通知模板隱藏「異動後」表格欄位
+        $has_swap = false;
+        foreach ($substitutes as $sub) {
+            if (($sub['type'] ?? '') === 'swap') {
+                $has_swap = true;
+                break;
+            }
+            if (!empty($sub['classes'])) {
+                foreach ($sub['classes'] as $cls) {
+                    if (!empty($cls['swap_date']) || (($cls['handle'] ?? 'substitute') !== 'substitute')) {
+                        $has_swap = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+        $xoopsTpl->assign('has_swap', $has_swap);
 
         //是否可管理本筆資料；已通過的假單僅管理員可編輯/刪除
         $can_manage = Tools::chk_own($all['uid'], 'return');

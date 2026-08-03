@@ -70,7 +70,9 @@
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_GRADE_CLASS}></th>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_CLASS_SUBJECT}></th>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_HANDLE}></th>
-                    <th scope="col"><{$smarty.const._MD_JILLLEAVE_CHANGED}></th>
+                    <{if $has_swap|default:false}>
+                        <th scope="col"><{$smarty.const._MD_JILLLEAVE_CHANGED}></th>
+                    <{/if}>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER}></th>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_PAY}></th>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></th>
@@ -86,11 +88,13 @@
                                 <td><{$class.grade_class|default:$grade_class}></td>
                                 <td><{$class.subject}></td>
                                 <td><{$class.handle_text}></td>
-                                <td>
-                                    <{if $class.swap_date}>
-                                        <{$class.swap_date}> <{$class.swap_period}><{if $class.swap_subject}>（<{$class.swap_subject}>）<{/if}>
-                                    <{/if}>
-                                </td>
+                                <{if $has_swap|default:false}>
+                                    <td>
+                                        <{if $class.swap_date}>
+                                            <{$class.swap_date}> <{$class.swap_period}><{if $class.swap_subject}>（<{$class.swap_subject}>）<{/if}>
+                                        <{/if}>
+                                    </td>
+                                <{/if}>
                                 <td><{$class.substitute_teacher}></td>
                                 <td><{$substitute.pay_text}></td>
                                 <td><{$substitute.type_text}></td>
@@ -103,8 +107,9 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
+                            <{if $has_swap|default:false}>
+                                <td></td>
+                            <{/if}>
                             <td><{$substitute.pay_text}></td>
                             <td><{$substitute.type_text}></td>
                         </tr>
