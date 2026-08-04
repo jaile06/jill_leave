@@ -182,7 +182,7 @@ class Jill_leave_cate
     public static function create($cate_sn = '' )
     {
         global $xoopsTpl, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         //抓取預設值
         $jill_leave_cate = (!empty($cate_sn)) ? self::get(['cate_sn' =>$cate_sn]) : [];
@@ -221,7 +221,7 @@ class Jill_leave_cate
     public static function store($data_arr = [])
     {
         global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         //XOOPS表單安全檢查
         if (empty($data_arr)) {
@@ -259,7 +259,7 @@ class Jill_leave_cate
     public static function update($where_arr=[], $data_arr = [])
     {
         global $xoopsDB, $xoopsUser;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         $and = Tools::get_and_where($where_arr);
 
@@ -303,7 +303,7 @@ class Jill_leave_cate
     public static function destroy($cate_sn = '')
     {
         global $xoopsDB;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         $cate_sn = (int) $cate_sn;
         if (empty($cate_sn)) {
@@ -334,7 +334,7 @@ class Jill_leave_cate
     public static function update_sort()
     {
         global $xoopsDB;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         if (empty($_POST['tr']) || !is_array($_POST['tr'])) {
             return _TAD_SORT_FAIL;
@@ -358,7 +358,7 @@ class Jill_leave_cate
         if (empty($cate_sn)) {
             return false;
         }
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
         
         $sql = "SELECT `enable` FROM `" . $xoopsDB->prefix("jill_leave_cate") . "` WHERE `cate_sn` = '{$cate_sn}'";
         $result = $xoopsDB->query($sql);

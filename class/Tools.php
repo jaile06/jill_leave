@@ -137,34 +137,41 @@ class Tools
         return $data;
     }
 
-    // 權限檢查
-    // 失敗時導向模組首頁，不可用 $_SERVER['PHP_SELF']——當呼叫端本身就是被檢查的頁面（如 config.php
-    // 開頭直接呼叫 chk_is_adm）時，導回自己會造成「無權限→重載→無權限」無限迴圈
-    public static function chk_is_adm($other = '', $id = '', $file = '', $line = '', $mode = '')
+    //檢查當前使用者是否為請假模組管理者（讀 session，由 get_session() 寫入）
+    public static function isAdmin(): bool
     {
-        $id   = (int) $id;
-        $file = str_replace('\\', '/', $file);
-        $index_url = XOOPS_URL . '/modules/jill_leave/index.php';
-        //注意：不可用 PHP_SELF 判斷後台（可被 PATH_INFO 偽造），後台已於 admin/main.php 設定 session
-        if (!empty($_SESSION['jill_leave_adm']) || ($other != '' && !empty($_SESSION[$other]))) {
-            if (!empty($id) && $other !== '' && !empty($_SESSION[$other])) {
-                if (in_array($id, $_SESSION[$other]) || $id == $_SESSION[$other]) {
-                    return true;
-                } elseif ($mode == 'return') {
-                    return false;
-                } else {
-                    redirect_header($index_url, 3, "您對筆資料 ($id) 無操作權限 {$file} ($line)");
-                }
-            } else {
+        return !empty($_SESSION['jill_leave_adm']);
+    }
+
+    /**
+     * 統一權限守門：管理員直接放行，或比對資料擁有者 uid
+     *
+     * @param int    $owner_uid 資料擁有者 uid（0 = 純管理員檢查）
+     * @param string $mode      'return' = 無權限時回傳 false 而非 redirect
+     * @return bool
+     */
+    public static function chk_permission(int $owner_uid = 0, string $mode = ''): bool
+    {
+        // 管理員直接放行
+        if (self::isAdmin()) {
+            return true;
+        }
+
+        // 比對資料擁有者
+        if ($owner_uid > 0) {
+            global $xoopsUser;
+            $now_uid = ($xoopsUser) ? (int) $xoopsUser->uid() : 0;
+            if ($now_uid && $now_uid === $owner_uid) {
                 return true;
             }
-        } else {
-            if ($mode == 'return') {
-                return false;
-            }
-            redirect_header($index_url, 3, "無操作權限 {$file} ($line)");
         }
+
+        if ($mode === 'return') {
+            return false;
+        }
+        redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_PERMISSION);
     }
+
 
     //取得session
     public static function get_session()
@@ -195,26 +202,6 @@ class Tools
                 }
             }
         }
-    }
-
-    //檢查是否為管理者或資料擁有者（假單本人）
-    public static function chk_own($uid = 0, $mode = '')
-    {
-        global $xoopsUser;
-
-        if (!empty($_SESSION['jill_leave_adm'])) {
-            return true;
-        }
-
-        $now_uid = ($xoopsUser) ? (int) $xoopsUser->uid() : 0;
-        if ($now_uid && $now_uid == (int) $uid) {
-            return true;
-        }
-
-        if ($mode == 'return') {
-            return false;
-        }
-        redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_PERMISSION);
     }
 
     //取得管理人員 Email 設定（讀模組偏好 adm_email）

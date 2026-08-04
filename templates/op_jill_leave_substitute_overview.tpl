@@ -31,7 +31,20 @@
     </div>
 </form>
 
-<{if $all_leaves|default:false}>
+<!--依單別分頁籤：日薪／鐘點代課 與 補調課-->
+<ul class="nav nav-tabs" role="tablist">
+    <{foreach from=$leave_tabs item=tab name=tb}>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link <{if $smarty.foreach.tb.first}>active<{/if}>" data-bs-toggle="tab" data-bs-target="#tab-pane-<{$tab.id}>" type="button" role="tab" aria-selected="<{if $smarty.foreach.tb.first}>true<{else}>false<{/if}>">
+                <{$tab.title}> <span class="badge bg-secondary ms-1"><{$tab.leaves|@count}></span>
+            </button>
+        </li>
+    <{/foreach}>
+</ul>
+<div class="tab-content border border-top-0 p-2">
+<{foreach from=$leave_tabs item=tab name=tb}>
+<div class="tab-pane fade <{if $smarty.foreach.tb.first}>show active<{/if}>" id="tab-pane-<{$tab.id}>" role="tabpanel">
+<{if $tab.leaves}>
     <div class="table-responsive">
     <table class="table table-hover align-middle mt-2">
         <thead class="table-light border-bottom border-2">
@@ -44,7 +57,7 @@
             </tr>
         </thead>
         <tbody>
-            <{foreach from=$all_leaves item=leave name=lv}>
+            <{foreach from=$tab.leaves item=leave name=lv}>
                 <!-- 請假單標題行 -->
                 <tr class="align-middle bg-white">
                     <td class="nowrap py-3 px-3">
@@ -135,6 +148,9 @@
         <h3><{$smarty.const._TAD_EMPTY}></h3>
     </div>
 <{/if}>
+</div>
+<{/foreach}>
+</div>
 </div>
 
 <script>

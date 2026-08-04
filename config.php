@@ -14,7 +14,7 @@ require_once XOOPS_ROOT_PATH . '/header.php';
 $op = Request::getString('op');
 
 //僅管理員可存取模組設定頁
-Tools::chk_is_adm('', '', __FILE__, __LINE__);
+Tools::chk_permission();
 
 /*-----------執行動作判斷區----------*/
 switch ($op) {

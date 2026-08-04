@@ -146,42 +146,27 @@
             sync_row($target_daily, true);
         } else {
             var panel_class = first_type === 'swap' ? '.swap-panel' : '.hour-panel';
-            var $first_checked = $first_card.find(panel_class + ' .period-row .period-check:checked').first().closest('.period-row');
-            var default_teacher_mode = 'assign';
-            var default_teacher_name = '';
-            var default_subject = '';
-            var default_handle = 'substitute';
-            if ($first_checked.length) {
-                default_teacher_mode = $first_checked.find('.teacher-opt:checked').val() || 'assign';
-                default_teacher_name = $first_checked.find('.teacher-input').val() || '';
-                default_subject = $.trim($first_checked.find('.subject-input').val());
-                default_handle = $first_checked.find('.handle-select').val() || (first_type === 'swap' ? 'swap' : 'substitute');
-            }
 
-            // 同節次只增加勾選，不取消目標已勾的節次
+            // 逐節次複製：目標節次沿用來源同節次自己的勾選與內容，不同節次各自獨立
             $first_card.find(panel_class + ' .period-row').each(function () {
                 var $src = $(this);
                 var period = $src.attr('data-period');
                 var $dst = $target_card.find(panel_class + ' .period-row[data-period="' + period + '"]');
                 if (!$dst.length) { return; }
 
-                if ($src.find('.period-check').is(':checked')) {
+                var checked = $src.find('.period-check').is(':checked');
+                if (checked) {
                     $dst.find('.period-check').prop('checked', true);
+                    var subject = $.trim($src.find('.subject-input').val());
+                    if (subject !== '') {
+                        $dst.find('.subject-input').val(subject);
+                    }
+                    var teacher_mode = $src.find('.teacher-opt:checked').val() || 'assign';
+                    $dst.find('.teacher-opt[value="' + teacher_mode + '"]').prop('checked', true);
+                    $dst.find('.teacher-input').val($src.find('.teacher-input').val());
+                    $dst.find('.handle-select').val($src.find('.handle-select').val() || (first_type === 'swap' ? 'swap' : 'substitute'));
                 }
                 sync_row($dst, $dst.find('.period-check').is(':checked'));
-            });
-
-            // 所有已勾選的節次統一套用第一天的內容
-            $target_card.find(panel_class + ' .period-row').each(function () {
-                var $row = $(this);
-                if (!$row.find('.period-check').is(':checked')) { return; }
-                if (default_subject !== '') {
-                    $row.find('.subject-input').val(default_subject);
-                }
-                $row.find('.teacher-opt[value="' + default_teacher_mode + '"]').prop('checked', true);
-                $row.find('.teacher-input').val(default_teacher_name);
-                $row.find('.handle-select').val(default_handle);
-                sync_row($row, true);
             });
         }
     }

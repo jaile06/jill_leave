@@ -75,7 +75,7 @@ class Jill_leave_substitute
     public static function destroy($substitute_sn = '')
     {
         global $xoopsDB;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         $substitute_sn = (int) $substitute_sn;
         if (empty($substitute_sn)) {
@@ -205,7 +205,8 @@ class Jill_leave_substitute
                     'is_advisor' => $data['is_advisor'],
                     'grade_class' => $data['grade_class'],
                     'cate_sn' => $data['cate_sn'],
-                    'cate_title' => $data['cate_title'],
+                    //補調課單無對應 jill_leave_cate 資料（cate_sn=0），假別名稱固定顯示「補調課」
+                    'cate_title' => ((int) $data['cate_sn'] === 0) ? _MD_JILLLEAVE_TYPE_SWAP : $data['cate_title'],
                     'start_date' => $data['start_date'],
                     'end_date' => $data['end_date'],
                     'status' => $data['status'],
@@ -238,7 +239,7 @@ class Jill_leave_substitute
     public static function overview($month = '')
     {
         global $xoopsTpl;
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
 
         list($leaves, $all_substitute_detail, $month) = self::get_overview_data($month);
 
@@ -247,6 +248,16 @@ class Jill_leave_substitute
             return $a['status'] <=> $b['status'];
         });
 
+        //依單別分頁籤：日薪／鐘點代課單（cate_sn>0）與補調課單（cate_sn=0）
+        $tabs = [
+            ['id' => 'sub', 'title' => _MD_JILLLEAVE_TAB_SUBSTITUTE, 'leaves' => []],
+            ['id' => 'swap', 'title' => _MD_JILLLEAVE_TYPE_SWAP, 'leaves' => []],
+        ];
+        foreach ($leaves as $leave) {
+            $tabs[((int) $leave['cate_sn'] === 0) ? 1 : 0]['leaves'][] = $leave;
+        }
+
+        $xoopsTpl->assign('leave_tabs', $tabs);
         $xoopsTpl->assign('all_leaves', $leaves);
         $xoopsTpl->assign('all_substitute_detail', $all_substitute_detail);
         $xoopsTpl->assign('month', $month);
@@ -267,7 +278,7 @@ class Jill_leave_substitute
     //匯出鐘點費清冊 Excel（例外流程：直接輸出檔案流，不走 footer 樣板）
     public static function export_excel($month = '')
     {
-        Tools::chk_is_adm('', '', __FILE__, __LINE__);
+        Tools::chk_permission();
         require_once XOOPS_ROOT_PATH . '/modules/tadtools/vendor/autoload.php';
 
         list($leaves, $all_substitute_detail, $month) = self::get_overview_data($month);

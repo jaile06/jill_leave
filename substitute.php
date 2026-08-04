@@ -14,7 +14,7 @@ $substitute_sn = Request::getInt('substitute_sn');
 $month = Request::getString('month', date('Y-m'));
 
 //僅管理者可存取代課總覽
-Tools::chk_is_adm('', '', __FILE__, __LINE__);
+Tools::chk_permission();
 
 //匯出鐘點費清冊 Excel（例外流程：直接輸出檔案流，不走樣板）
 if ($op == 'export_excel') {

@@ -1,5 +1,6 @@
 <?php
 use Xmf\Request;
+use XoopsModules\Jill_leave\Tools;
 use XoopsModules\Jill_leave\Jill_leave;
 use XoopsModules\Jill_leave\Jill_leave_class;
 
@@ -55,7 +56,7 @@ function handleStatusUpdate(int $sn): void
     header('Content-Type: application/json; charset=utf-8');
 
     // 管理員權限檢查
-    if (!Jill_leave::isAdmin()) {
+    if (!Tools::isAdmin()) {
         echo json_encode(['success' => false, 'message' => _MD_JILLLEAVE_NO_PERMISSION]);
         exit;
     }

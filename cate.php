@@ -11,7 +11,7 @@ $op = Request::getString('op');
 $cate_sn = Request::getInt('cate_sn');
 
 //僅 leave_adm 可存取假別分類管理
-Tools::chk_is_adm('', '', __FILE__, __LINE__);
+Tools::chk_permission();
 
 //AJAX 拖曳排序（直接輸出訊息，不走樣板）
 if ($op == 'update_sort') {

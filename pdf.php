@@ -34,7 +34,7 @@ if (empty($jill_leave)) {
     exit;
 }
 
-Tools::chk_own($jill_leave['uid']);
+Tools::chk_permission((int) $jill_leave['uid']);
 
 //0 為補調課單保留值，不在假別表中
 $jill_leave_cate = ((int) $jill_leave['cate_sn'] === 0) ? [] : Jill_leave_cate::get(['cate_sn' => $jill_leave['cate_sn']], [], '');

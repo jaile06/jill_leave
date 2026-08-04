@@ -18,11 +18,11 @@ class Jill_leave
     const GROUP_STUDENT = 4;
 
     /**
-     * 檢查當前使用者是否為請假模組管理者
+     * 檢查當前使用者是否為請假模組管理者（委託 Tools 統一判斷）
      */
     public static function isAdmin(): bool
     {
-        return !empty($_SESSION['jill_leave_adm']);
+        return Tools::isAdmin();
     }
 
     /**
@@ -217,7 +217,7 @@ class Jill_leave
         }
 
         //僅管理者或本人可檢視本筆資料
-        Tools::chk_own($all['uid']);
+        Tools::chk_permission((int) $all['uid']);
 
         //將 uid 編號轉換成使用者姓名（或帳號）
         $all['uid_name'] = Utility::get_name_by_uid($all['uid']);
@@ -257,9 +257,9 @@ class Jill_leave
         $xoopsTpl->assign('has_swap', $has_swap);
 
         //是否可管理本筆資料；已通過的假單僅管理員可編輯/刪除
-        $can_manage = Tools::chk_own($all['uid'], 'return');
+        $can_manage = Tools::chk_permission((int) $all['uid'], 'return');
         $xoopsTpl->assign('can_manage', $can_manage);
-        $xoopsTpl->assign('can_edit', $can_manage && (!empty($_SESSION['jill_leave_adm']) || (int) $all['status'] !== 1));
+        $xoopsTpl->assign('can_edit', $can_manage && (Tools::isAdmin() || (int) $all['status'] !== 1));
 
         //CSRF token（GET 刪除連結用，不清除以供同頁多次操作）
         $token = $GLOBALS['xoopsSecurity']->createToken();
@@ -325,9 +325,9 @@ class Jill_leave
 
         //僅管理者或本人可編輯
         if (!empty($jill_leave)) {
-            Tools::chk_own($jill_leave['uid']);
+            Tools::chk_permission((int) $jill_leave['uid']);
             //已通過的假單僅管理員可修改
-            if (empty($_SESSION['jill_leave_adm']) && (int) ($jill_leave['status'] ?? 0) === 1) {
+            if (!Tools::isAdmin() && (int) ($jill_leave['status'] ?? 0) === 1) {
                 redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
             }
         } elseif (empty($xoopsUser)) {
@@ -527,7 +527,7 @@ class Jill_leave
         //節次級衝突檢查：本次要佔用的節次是否與同一人其他有效假單重疊（涵蓋請假與補調課雙向）
         self::chk_slot_conflicts((int) $uid, 0, XOOPS_URL . '/modules/jill_leave/index.php');
 
-        $status = !empty($_SESSION['jill_leave_adm']) ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
+        $status = Tools::isAdmin() ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
         $create_date = date("Y-m-d H:i:s", xoops_getUserTimestamp(time()));
         $update_date = date("Y-m-d H:i:s", xoops_getUserTimestamp(time()));
 
@@ -580,7 +580,7 @@ class Jill_leave
         $and = Tools::get_and_where($where_arr);
 
         if (!empty($data_arr)) {
-            Tools::chk_is_adm('', '', __FILE__, __LINE__);
+            Tools::chk_permission();
 
             //僅允許已知欄位，禁止呼叫端把使用者輸入當 key 傳入而注入任意欄位/SQL
             $allowed_cols = ['leavers', 'cate_sn', 'is_advisor', 'grade_class', 'start_date', 'end_date', 'status', 'update_date'];
@@ -607,10 +607,10 @@ class Jill_leave
         if (empty($old)) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION);
         }
-        Tools::chk_own($old['uid']);
+        Tools::chk_permission((int) $old['uid']);
 
         //已通過的假單僅管理員可修改/刪除
-        if (empty($_SESSION['jill_leave_adm']) && (int) ($old['status'] ?? 0) === 1) {
+        if (!Tools::isAdmin() && (int) ($old['status'] ?? 0) === 1) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
         }
 
@@ -646,7 +646,7 @@ class Jill_leave
         self::chk_slot_conflicts($uid_chk, $self_sn, XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn);
 
         //一般使用者更新後回到待審核，管理者可指定狀態
-        $status = !empty($_SESSION['jill_leave_adm']) ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
+        $status = Tools::isAdmin() ? Tools::filter('status', $_POST['status'] ?? 0, 'write', self::$filter_arr) : 0;
         $update_date = date("Y-m-d H:i:s", xoops_getUserTimestamp(time()));
 
         $sql = "UPDATE `" . $xoopsDB->prefix("jill_leave") . "` SET
@@ -852,10 +852,10 @@ class Jill_leave
         if (empty($old)) {
             return;
         }
-        Tools::chk_own($old['uid']);
+        Tools::chk_permission((int) $old['uid']);
 
         //已通過的假單僅管理員可修改/刪除
-        if (empty($_SESSION['jill_leave_adm']) && (int) ($old['status'] ?? 0) === 1) {
+        if (!Tools::isAdmin() && (int) ($old['status'] ?? 0) === 1) {
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_APPROVED_LOCKED);
         }
 

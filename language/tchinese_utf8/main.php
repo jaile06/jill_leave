@@ -52,6 +52,7 @@ define('_MD_JILLLEAVE_TYPE_DAILY', '日薪');
 define('_MD_JILLLEAVE_TYPE_HOUR', '鐘點');
 define('_MD_JILLLEAVE_TYPE_SWAP', '補調課');
 define('_MD_JILLLEAVE_APPLY_SWAP', '申請補調課');
+define('_MD_JILLLEAVE_TAB_SUBSTITUTE', '日薪／鐘點代課');
 
 //代課批次表單
 define('_MD_JILLLEAVE_SUBSTITUTE_INFO', '代課資訊');

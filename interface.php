@@ -10,7 +10,7 @@ $interface_menu[_MD_JILLLEAVE_INDEX]="index.php";
 $interface_icon[_MD_JILLLEAVE_INDEX]="fa-home";
 
 //管理功能僅 leave_adm 可見
-if (!empty($_SESSION['jill_leave_adm'])) {
+if (Tools::isAdmin()) {
     // 代理人設定：使用使用者代人或代理關係圖示 (fa-user-friends)
     $interface_menu[_MD_JILLLEAVE_SUBSTITUTE]="substitute.php";
     $interface_icon[_MD_JILLLEAVE_SUBSTITUTE]="fa-user-friends";
