@@ -9,9 +9,6 @@ use XoopsModules\Jill_leave\Jill_leave_substitute;
 require_once __DIR__ . '/header.php';
 
 // 僅關閉畫面輸出，避免 Warning 等訊息污染 PDF 二進位資料流；
-// 不動 error_reporting，讓錯誤仍照站台設定寫入 log（log_errors 不受 display_errors 影響），
-// 真正跑出問題時還查得到，而非整批消音。輸出前的 ob_end_clean() 是最後一道防線，
-// 萬一真的有東西被印出來也會在送出 PDF 前清掉。
 ini_set('display_errors', 0);
 
 // 僅登入使用者才可以匯出 PDF
@@ -99,7 +96,7 @@ $W = 186;
 // 標題區
 // ══════════════════════════════════════════
 $pdf->SetFont($font, 'B', 14);
-$pdf->Cell($W, 8, "教師請假所遺課程處理報告單", 0, 1, 'C');
+$pdf->Cell($W, 8, "調代課申請所遺課程處理報告單", 0, 1, 'C');
 $pdf->SetFont($font, '', 8);
 $pdf->Cell($W, 5, "★ 遺課處理單請交給 教務處，差勤系統的假單上也務必上傳本表單 ★", 0, 1, 'C');
 $pdf->Ln(2);

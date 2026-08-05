@@ -1,7 +1,7 @@
 <?php
 
 xoops_loadLanguage('main', 'tadtools');
-define('_MD_JILLLEAVE_INDEX', '教師請假主頁');
+define('_MD_JILLLEAVE_INDEX', '調代課申請主頁');
 define('_MD_JILLLEAVE_IS_ADVISOR_DEF', '1=級任');
 define('_MD_JILLLEAVE_STATUS_DEF', '1=已通過');
 define('_MD_JILLLEAVE_SN', '請假編號');

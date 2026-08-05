@@ -16,9 +16,7 @@ class Jill_leave_class
         'explode' => [],   //用分號隔開的欄位
     ];
 
-    // ponytail: 遺課處理方式（委託代課／自己補課／與他人調課）與異動後課程，一律收進既有的 subject JSON，
-    // 不新增資料表欄位。handle 省略即為舊行為「委託代課」，舊資料零遷移。
-    // 需要跨假單雙向記錄（對方老師名下也生一筆）時才需另立資料表。
+    // 遺課處理方式（委託代課／自己補課／與他人調課）與異動後課程，一律收進既有的 subject JSON
     public static $handle_keys = ['handle', 'swap_date', 'swap_period', 'swap_subject'];
 
     //處理方式顯示文字
@@ -150,12 +148,6 @@ class Jill_leave_class
 
     /**
      * 查詢同一請假者名下是否已有節次佔用與傳入節次重疊
-     *
-     * 「佔用」不分請假類型：一個 (日期, 節次) 只能屬於一張單，來源有兩種——
-     * 該節本人請假不在（substitute_date + class_period），或該節是補調課異動後要來上課
-     * （subject JSON 內的 swap_date + swap_period）。JSON 在 PHP 端解析比對，
-     * 不依賴 MySQL JSON 函式（專案未用過，版本未知）。
-     *
      * @param int   $uid         請假者 uid
      * @param array $slots       待檢查節次，每個元素格式為 ['date' => 'yyyy-mm-dd', 'period' => '第N節']
      * @param int   $exclude_sn  編輯模式排除自身假單的 sn（新增時傳 0）

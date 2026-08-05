@@ -2,14 +2,14 @@
 
 xoops_loadLanguage('modinfo_common', 'tadtools');
 
-define('_MI_JILLLEAVE_NAME','教師請假');
-define('_MI_JILLLEAVE_AUTHOR','教師請假');
+define('_MI_JILLLEAVE_NAME','調代課申請');
+define('_MI_JILLLEAVE_AUTHOR','tnjaile');
 define('_MI_JILLLEAVE_CREDITS','');
-define('_MI_JILLLEAVE_DESC','此模組的用途是提供教學組掌握教師請假調代課資訊');
+define('_MI_JILLLEAVE_DESC','此模組的用途是提供教學組掌握調代課申請調代課資訊');
 define('_MI_JILLLEAVE_AUTHOR_WEB','Jill的開發站');
 define('_MI_JILLLEAVE_ADM_MAIN', '管理設定');
 define('_MI_JILLLEAVE_ADM_PAGE_MAIN_DESC', '管理設定');
-define('_MI_JILLLEAVE_INDEX', '教師請假主頁');
+define('_MI_JILLLEAVE_INDEX', '調代課申請主頁');
 define('_MI_JILLLEAVE_CATE', '假別分類');
 define('_MI_JILLLEAVE_SUBSTITUTE', '代課管理');
 define('_MI_JILLLEAVE_ADM_EMAIL', '管理人員 Email');

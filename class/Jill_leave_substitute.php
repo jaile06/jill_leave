@@ -53,11 +53,6 @@ class Jill_leave_substitute
                 $data[$item . '_arr'] = explode(';', $data[$item]);
             }
 
-            // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-            //     $data['xxx'] = ooo::get_all();
-            // }
-            
-
             $new_key = $key_name ? $data[$key_name] : $i;
             $data_arr[$new_key] = $get_value ? $data[$get_value] : $data;
             $i++;

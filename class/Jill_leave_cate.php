@@ -87,12 +87,6 @@ class Jill_leave_cate
             foreach (self::$filter_arr['explode'] as $item) {
                 $data[$item . '_arr'] = explode(';', $data[$item]);
             }
-
-            // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-            //     $data['xxx'] = ooo::get_all();
-            // }
-            
-
             $new_key = $key_name ? $data[$key_name] : $i;
             $data_arr[$new_key] = $get_value ? $data[$get_value] : $data;
             $i++;
@@ -123,8 +117,6 @@ class Jill_leave_cate
         foreach ($all as $key => $value) {
             $all[$key] = Tools::filter($key, $value, 'read', self::$filter_arr);
         }
-
-        
 
         $SweetAlert   = new SweetAlert();
         $token = $GLOBALS['xoopsSecurity']->createToken();
@@ -160,11 +152,6 @@ class Jill_leave_cate
             return [];
         }
         $data = Tools::filter_all_data($filter, $data, self::$filter_arr);
-
-
-        // if (in_array('xxx', $other_arr) || in_array('all', $other_arr)) {
-        //     $data['xxx'] = ooo::get_all();
-        // }
 
         foreach (self::$filter_arr['explode'] as $item) {
             $data[$item . '_arr'] = explode(';', $data[$item]);
@@ -208,10 +195,7 @@ class Jill_leave_cate
 
         //套用formValidator驗證機制
         $formValidator = new FormValidator("#myForm", true);
-        $formValidator->render();
-
-        
-    
+        $formValidator->render();   
         //加入Token安全機制
         Utility::token_form();
     }
@@ -267,7 +251,6 @@ class Jill_leave_cate
             //僅允許已知欄位，禁止呼叫端把使用者輸入當 key 傳入而注入任意欄位/SQL
             $allowed_cols = ['cate_title', 'cate_sort', 'enable', 'force_pay'];
             $data_arr = array_intersect_key($data_arr, array_flip($allowed_cols));
-
             $col_arr = [];
             foreach ($data_arr as $key => $value) {
                 $value = Tools::filter($key, $value, 'write', self::$filter_arr);
@@ -279,7 +262,6 @@ class Jill_leave_cate
         } else {
             //XOOPS表單安全檢查
             Utility::xoops_security_check(__FILE__, __LINE__);
-
             //僅取用已知欄位，禁止 $$key 展開 POST（防止覆寫 $and 注入 WHERE）
             $cate_title = Tools::filter('cate_title', $_POST['cate_title'] ?? '', 'write', self::$filter_arr);
             $cate_sort = Tools::filter('cate_sort', $_POST['cate_sort'] ?? 0, 'write', self::$filter_arr);
@@ -316,9 +298,6 @@ class Jill_leave_cate
         
     }
 
-
-
-
     //自動取得 jill_leave_cate 的最新排序 Jill_leave_cate::get_max()
     public static function max_sort()
     {
@@ -328,7 +307,6 @@ class Jill_leave_cate
         list($sort) = $xoopsDB->fetchRow($result);
         return ++$sort;
     }
-
 
     //AJAX 拖曳排序，批次更新 cate_sort Jill_leave_cate::update_sort()
     public static function update_sort()
