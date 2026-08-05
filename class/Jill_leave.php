@@ -14,9 +14,6 @@ use XoopsModules\Tadtools\My97DatePicker;
 
 class Jill_leave
 {
-    // 群組 ID 常數定義
-    const GROUP_STUDENT = 4;
-
     /**
      * 檢查當前使用者是否為請假模組管理者（委託 Tools 統一判斷）
      */
@@ -26,16 +23,17 @@ class Jill_leave
     }
 
     /**
-     * 檢查指定使用者（或當前使用者）是否為學生群組
+     * 檢查指定使用者（或當前使用者）是否屬於管理者設定的禁用群組（管理員不受限制）
      */
-    public static function isStudent(?\XoopsUser $user = null): bool
+    public static function isDenied(?\XoopsUser $user = null): bool
     {
         global $xoopsUser;
         $user = $user ?? $xoopsUser;
-        if (!$user) {
+        if (!$user || self::isAdmin()) {
             return false;
         }
-        return in_array(self::GROUP_STUDENT, $user->getGroups(), true);
+        $denyGroups = (array) ($GLOBALS['xoopsModuleConfig']['deny_groups'] ?? [3]);
+        return (bool) array_intersect($denyGroups, $user->getGroups());
     }
 
     /**
@@ -50,7 +48,7 @@ class Jill_leave
             return 0;
         }
 
-        if (self::isStudent($xoopsUser)) {
+        if (self::isDenied($xoopsUser)) {
             $xoopsTpl->assign('show_login_alert', false);
             $xoopsTpl->assign('show_student_alert', true);
             return 0;

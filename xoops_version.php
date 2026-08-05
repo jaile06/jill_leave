@@ -117,3 +117,12 @@ $modversion['config'][] = [
     'valuetype' => 'text',
     'default' => _MI_JILLLEAVE_CLASS_PERIOD_DEFAULT,
 ];
+
+$modversion['config'][] = [
+    'name' => 'deny_groups',
+    'title' => '_MI_JILLLEAVE_DENY_GROUPS',
+    'description' => '_MI_JILLLEAVE_DENY_GROUPS_DESC',
+    'formtype' => 'group_multi',
+    'valuetype' => 'array',
+    'default' => [3],
+];
