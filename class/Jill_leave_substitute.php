@@ -285,32 +285,63 @@ class Jill_leave_substitute
 
         $excel = new \PHPExcel();
         $excel->getProperties()->setTitle(_MD_JILLLEAVE_EXPORT_TITLE . $month);
-        
-        // -------------------------------------------------------------
-        // Sheet 0: 鐘點費代課清冊 (僅含委託代課)
-        // -------------------------------------------------------------
-        $sheet0 = $excel->setActiveSheetIndex(0);
-        $sheet0->setTitle($month . ' 鐘點費代課');
 
-        $titles0 = [
+        // -------------------------------------------------------------
+        // Sheet 0: 原填報資料總覽清單（逐節次列出，未彙總）
+        // -------------------------------------------------------------
+        $sheet_overview = $excel->setActiveSheetIndex(0);
+        $sheet_overview->setTitle(_MD_JILLLEAVE_SHEET_OVERVIEW);
+        $titles_overview = [
+            _MD_JILLLEAVE_ROW_NO,
+            _MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER,
             _MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE,
             _MD_JILLLEAVE_LEAVERS,
             _MD_JILLLEAVE_CATE_CATE_TITLE,
-            _MD_JILLLEAVE_GRADE_CLASS,
-            _MD_JILLLEAVE_CLASS_CLASS_PERIOD,
-            _MD_JILLLEAVE_CLASS_SUBJECT,
-            _MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER,
             _MD_JILLLEAVE_SUBSTITUTE_PAY,
             _MD_JILLLEAVE_SUBSTITUTE_TYPE,
+            _MD_JILLLEAVE_CLASS_CLASS_PERIOD,
         ];
-        foreach ($titles0 as $col => $title) {
-            $sheet0->setCellValueByColumnAndRow($col, 1, $title);
+        foreach ($titles_overview as $col => $col_title) {
+            $sheet_overview->setCellValueByColumnAndRow($col, 1, $col_title);
         }
 
         // -------------------------------------------------------------
-        // Sheet 1: 補調課備查表 (含自己補課與與他人調課)
+        // Sheet 1~4: 代課費清冊，依「代課類型 x 支付方式」分頁彙總總節次（鐘點-自費／鐘點-公費／日薪課務自理／日薪公費派代）
         // -------------------------------------------------------------
-        $sheet1 = $excel->createSheet(1);
+        $sheet_defs = [
+            'hour_self'    => _MD_JILLLEAVE_SHEET_HOUR_SELF,
+            'hour_school'  => _MD_JILLLEAVE_SHEET_HOUR_SCHOOL,
+            'daily_self'   => _MD_JILLLEAVE_SHEET_DAILY_SELF,
+            'daily_school' => _MD_JILLLEAVE_SHEET_DAILY_SCHOOL,
+        ];
+        $titles0 = [
+            _MD_JILLLEAVE_CLASS_SUBSTITUTE_TEACHER,
+            _MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE,
+            _MD_JILLLEAVE_LEAVERS,
+            _MD_JILLLEAVE_CATE_CATE_TITLE,
+            _MD_JILLLEAVE_PERIOD_COUNT,
+            _MD_JILLLEAVE_AMOUNT_DUE,
+            _MD_JILLLEAVE_LABOR_INSURANCE,
+            _MD_JILLLEAVE_AMOUNT_PAID,
+            _MD_JILLLEAVE_REMARK,
+        ];
+
+        $sheets = [];
+        $sheet_index = 1;
+        foreach ($sheet_defs as $key => $title) {
+            $sheet = $excel->createSheet($sheet_index);
+            $sheet->setTitle($title);
+            foreach ($titles0 as $col => $col_title) {
+                $sheet->setCellValueByColumnAndRow($col, 1, $col_title);
+            }
+            $sheets[$key] = $sheet;
+            $sheet_index++;
+        }
+
+        // -------------------------------------------------------------
+        // Sheet 5: 補調課備查表 (含自己補課與與他人調課)
+        // -------------------------------------------------------------
+        $sheet1 = $excel->createSheet($sheet_index);
         $sheet1->setTitle('補調課備查表');
 
         $titles1 = [
@@ -331,7 +362,7 @@ class Jill_leave_substitute
         }
 
         // 收集所有要匯出的資料列
-        $export_data0 = []; // 代課
+        $export_data0 = ['hour_self' => [], 'hour_school' => [], 'daily_self' => [], 'daily_school' => []]; // 代課，依分頁 key 分組
         $export_data1 = []; // 補調課
 
         foreach ($leaves as $leave) {
@@ -360,8 +391,9 @@ class Jill_leave_substitute
                             'swap_subject' => $class['swap_subject'] ?? '',
                         ];
                     } else {
-                        // 鐘點費代課資料 -> 進入 Sheet 0
-                        $export_data0[] = [
+                        // 代課清冊資料 -> 依「代課類型 x 支付方式」分進對應分頁
+                        $sheet_key = ($substitute['type'] === 'hour' ? 'hour' : 'daily') . '_' . ($substitute['pay'] === 'school' ? 'school' : 'self');
+                        $export_data0[$sheet_key][] = [
                             'date'               => $substitute['substitute_date'],
                             'leaver'             => $leave['leavers'],
                             'cate_title'         => $leave['cate_title'],
@@ -385,25 +417,58 @@ class Jill_leave_substitute
             if ($leaver_compare !== 0) return $leaver_compare;
             return strcmp($a['class_period'], $b['class_period']);
         };
-        usort($export_data0, $sorter);
+        foreach ($export_data0 as $sheet_key => &$rows) {
+            usort($rows, $sorter);
+        }
+        unset($rows);
         usort($export_data1, $sorter);
 
-        // 寫入 Sheet 0
+        // 寫入 Sheet 0：原填報資料總覽清單（逐節次列出，不分頁不彙總）
         $row = 2;
-        foreach ($export_data0 as $data) {
-            $sheet0->setCellValueByColumnAndRow(0, $row, $data['date']);
-            $sheet0->setCellValueByColumnAndRow(1, $row, $data['leaver']);
-            $sheet0->setCellValueByColumnAndRow(2, $row, $data['cate_title']);
-            $sheet0->setCellValueByColumnAndRow(3, $row, $data['grade_class']);
-            $sheet0->setCellValueByColumnAndRow(4, $row, $data['class_period']);
-            $sheet0->setCellValueByColumnAndRow(5, $row, $data['subject']);
-            $sheet0->setCellValueByColumnAndRow(6, $row, $data['substitute_teacher']);
-            $sheet0->setCellValueByColumnAndRow(7, $row, $data['pay_text']);
-            $sheet0->setCellValueByColumnAndRow(8, $row, $data['type_text']);
-            $row++;
+        $no = 1;
+        foreach ($sheet_defs as $sheet_key => $sheet_title) {
+            foreach ($export_data0[$sheet_key] as $data) {
+                $sheet_overview->setCellValueByColumnAndRow(0, $row, $no++);
+                $sheet_overview->setCellValueByColumnAndRow(1, $row, $data['substitute_teacher']);
+                $sheet_overview->setCellValueByColumnAndRow(2, $row, $data['date']);
+                $sheet_overview->setCellValueByColumnAndRow(3, $row, $data['leaver']);
+                $sheet_overview->setCellValueByColumnAndRow(4, $row, $data['cate_title']);
+                $sheet_overview->setCellValueByColumnAndRow(5, $row, $data['pay_text']);
+                $sheet_overview->setCellValueByColumnAndRow(6, $row, $data['type_text']);
+                $sheet_overview->setCellValueByColumnAndRow(7, $row, $data['class_period']);
+                $row++;
+            }
         }
 
-        // 寫入 Sheet 1
+        // 寫入 Sheet 1~4：依「代課教師/日期/請假者/假別」彙總總節次（應領金額/勞保/實領金額/備註留空，由人工填寫）
+        foreach ($sheet_defs as $sheet_key => $sheet_title) {
+            $sheet = $sheets[$sheet_key];
+            $grouped = [];
+            foreach ($export_data0[$sheet_key] as $data) {
+                $group_key = implode('|', [$data['substitute_teacher'], $data['date'], $data['leaver'], $data['cate_title']]);
+                if (!isset($grouped[$group_key])) {
+                    $grouped[$group_key] = [
+                        'substitute_teacher' => $data['substitute_teacher'],
+                        'date'               => $data['date'],
+                        'leaver'             => $data['leaver'],
+                        'cate_title'         => $data['cate_title'],
+                        'period_count'       => 0,
+                    ];
+                }
+                $grouped[$group_key]['period_count']++;
+            }
+            $row = 2;
+            foreach ($grouped as $data) {
+                $sheet->setCellValueByColumnAndRow(0, $row, $data['substitute_teacher']);
+                $sheet->setCellValueByColumnAndRow(1, $row, $data['date']);
+                $sheet->setCellValueByColumnAndRow(2, $row, $data['leaver']);
+                $sheet->setCellValueByColumnAndRow(3, $row, $data['cate_title']);
+                $sheet->setCellValueByColumnAndRow(4, $row, $data['period_count']);
+                $row++;
+            }
+        }
+
+        // 寫入 Sheet 5：補調課備查表
         $row = 2;
         foreach ($export_data1 as $data) {
             $sheet1->setCellValueByColumnAndRow(0, $row, $data['date']);

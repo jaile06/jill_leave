@@ -112,6 +112,19 @@ define('_MD_JILLLEAVE_FILTER', '篩選');
 define('_MD_JILLLEAVE_EXPORT_EXCEL', '匯出鐘點費清冊');
 define('_MD_JILLLEAVE_EXPORT_TITLE', '鐘點費清冊 ');
 
+//匯出 Excel 分頁標題與金額欄位（金額欄位留空由人工填寫，程式未計算費率）
+define('_MD_JILLLEAVE_SHEET_OVERVIEW', '原填報資料總覽清單');
+define('_MD_JILLLEAVE_SHEET_HOUR_SELF', '鐘點-自費');
+define('_MD_JILLLEAVE_SHEET_HOUR_SCHOOL', '鐘點-公費');
+define('_MD_JILLLEAVE_SHEET_DAILY_SELF', '日薪課務自理');
+define('_MD_JILLLEAVE_SHEET_DAILY_SCHOOL', '日薪公費派代');
+define('_MD_JILLLEAVE_ROW_NO', '編號');
+define('_MD_JILLLEAVE_PERIOD_COUNT', '節數');
+define('_MD_JILLLEAVE_REMARK', '備註');
+define('_MD_JILLLEAVE_AMOUNT_DUE', '應領金額');
+define('_MD_JILLLEAVE_LABOR_INSURANCE', '勞保');
+define('_MD_JILLLEAVE_AMOUNT_PAID', '實領金額');
+
 //管理人員設定
 define('_MD_JILLLEAVE_ADM_EMAIL', '管理人員 Email');
 define('_MD_JILLLEAVE_ADM_EMAIL_DESC', '多筆 Email 請以「;」分號隔開，列於此處的使用者登入後即具有本模組的管理權限（需重新登入生效）。');
