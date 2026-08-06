@@ -140,18 +140,20 @@ $c_subj    = 18; // 科目
 $c_class   = 16; // 班級
 // → 小計 70
 
-$c_sub_pay = 16; // 代課方式（公/自費）
-$c_sub_tch = 24; // 代課老師
-// → 代課小計 40
+$c_sub_pay  = 14; // 代課方式（公/自費）
+$c_sub_tch  = 20; // 代課老師
+$c_sub_sign = 16; // 代課老師簽名
+// → 代課小計 50
 
 $c_mk_date = 16; // 補課日
 $c_mk_per  = 14; // 補課節次
 // → 補課小計 30
 
-$c_sw_date = 16; // 調課日
-$c_sw_per  = 12; // 調課節次
-$c_sw_tch  = 18; // 對調教師
-// → 調課小計 46 (調課日/節/師)
+$c_sw_date = 14; // 調課日
+$c_sw_per  = 10; // 調課節次
+$c_sw_tch  = 14; // 對調教師
+$c_sw_sign = 16; // 對調教師簽名
+// → 調課小計 54 (調課日/節/師/簽)
 
 // 總計目前：70+40+30+46=186 ✓（備註合進去）
 
@@ -175,15 +177,16 @@ $right_avail = $W - $left_w;                                        // 116
 
 // 原始右側總寬
 $right_orig = 0;
-if ($has_substitute) $right_orig += $c_sub_pay + $c_sub_tch;
+if ($has_substitute) $right_orig += $c_sub_pay + $c_sub_tch + $c_sub_sign;
 if ($has_makeup)     $right_orig += $c_mk_date + $c_mk_per;
-if ($has_swap)       $right_orig += $c_sw_date + $c_sw_per + $c_sw_tch;
+if ($has_swap)       $right_orig += $c_sw_date + $c_sw_per + $c_sw_tch + $c_sw_sign;
 
 if ($right_orig > 0 && $right_orig !== $right_avail) {
     $scale = $right_avail / $right_orig;
     if ($has_substitute) {
-        $c_sub_pay = (int)round($c_sub_pay * $scale);
-        $c_sub_tch = (int)round($c_sub_tch * $scale);
+        $c_sub_pay  = (int)round($c_sub_pay  * $scale);
+        $c_sub_tch  = (int)round($c_sub_tch  * $scale);
+        $c_sub_sign = (int)round($c_sub_sign * $scale);
     }
     if ($has_makeup) {
         $c_mk_date = (int)round($c_mk_date * $scale);
@@ -193,16 +196,17 @@ if ($right_orig > 0 && $right_orig !== $right_avail) {
         $c_sw_date = (int)round($c_sw_date * $scale);
         $c_sw_per  = (int)round($c_sw_per  * $scale);
         $c_sw_tch  = (int)round($c_sw_tch  * $scale);
+        $c_sw_sign = (int)round($c_sw_sign * $scale);
     }
     // 修正捨入誤差：補到最後一個欄位
     $actual_right = 0;
-    if ($has_substitute) $actual_right += $c_sub_pay + $c_sub_tch;
+    if ($has_substitute) $actual_right += $c_sub_pay + $c_sub_tch + $c_sub_sign;
     if ($has_makeup)     $actual_right += $c_mk_date + $c_mk_per;
-    if ($has_swap)       $actual_right += $c_sw_date + $c_sw_per + $c_sw_tch;
+    if ($has_swap)       $actual_right += $c_sw_date + $c_sw_per + $c_sw_tch + $c_sw_sign;
     $diff = $right_avail - $actual_right;
-    if ($has_swap)           $c_sw_tch  += $diff;
-    elseif ($has_makeup)     $c_mk_per  += $diff;
-    else                     $c_sub_tch += $diff;
+    if ($has_swap)           $c_sw_sign  += $diff;
+    elseif ($has_makeup)     $c_mk_per   += $diff;
+    else                     $c_sub_sign += $diff;
 }
 
 // ─ 第一層標頭（分組大標）─────────────────
@@ -212,7 +216,7 @@ $h1 = 5;
 $pdf->Cell($c_date + $c_week + $c_period + $c_subj + $c_class, $h1, "請假期間課程", 1, 0, 'C');
 // 1.委託他人代課（僅在有 substitute 時顯示）
 if ($has_substitute) {
-    $pdf->Cell($c_sub_pay + $c_sub_tch, $h1, "委託他人代課方式", 1, 0, 'C');
+    $pdf->Cell($c_sub_pay + $c_sub_tch + $c_sub_sign, $h1, "委託他人代課方式", 1, 0, 'C');
 }
 // 2.自己補課（僅在有 makeup 時顯示）
 if ($has_makeup) {
@@ -220,7 +224,7 @@ if ($has_makeup) {
 }
 // 3.與他人調課（僅在有 swap 時顯示）
 if ($has_swap) {
-    $pdf->Cell($c_sw_date + $c_sw_per + $c_sw_tch, $h1, "本人調課方式", 1, 0, 'C');
+    $pdf->Cell($c_sw_date + $c_sw_per + $c_sw_tch + $c_sw_sign, $h1, "本人調課方式", 1, 0, 'C');
 }
 $pdf->Ln();
 
@@ -232,8 +236,9 @@ $pdf->Cell($c_period, $h2, "節次",    1, 0, 'C');
 $pdf->Cell($c_subj,   $h2, "科目",    1, 0, 'C');
 $pdf->Cell($c_class,  $h2, "班級",    1, 0, 'C');
 if ($has_substitute) {
-    $pdf->Cell($c_sub_pay,$h2, "公/自費", 1, 0, 'C');
-    $pdf->Cell($c_sub_tch,$h2, "代課老師",1, 0, 'C');
+    $pdf->Cell($c_sub_pay, $h2, "公/自費",  1, 0, 'C');
+    $pdf->Cell($c_sub_tch, $h2, "代課老師", 1, 0, 'C');
+    $pdf->Cell($c_sub_sign,$h2, "代課老師簽名", 1, 0, 'C');
 }
 if ($has_makeup) {
     $pdf->Cell($c_mk_date,$h2, "補課日期",1, 0, 'C');
@@ -243,6 +248,7 @@ if ($has_swap) {
     $pdf->Cell($c_sw_date,$h2, "調課日期",1, 0, 'C');
     $pdf->Cell($c_sw_per, $h2, "節次",  1, 0, 'C');
     $pdf->Cell($c_sw_tch, $h2, "對調教師/班級/科目", 1, 0, 'C');
+    $pdf->Cell($c_sw_sign,$h2, "對調教師簽名", 1, 0, 'C');
 }
 $pdf->Ln();
 
@@ -292,8 +298,9 @@ if (!empty($rows)) {
         $pdf->Cell($c_subj,   $row_h, $r['subject'], 1, 0, 'C');
         $pdf->Cell($c_class,  $row_h, $r['gc'],      1, 0, 'C');
         if ($has_substitute) {
-            $pdf->Cell($c_sub_pay,$row_h, $sub_pay, 1, 0, 'C');
-            $pdf->Cell($c_sub_tch,$row_h, $sub_tch, 1, 0, 'C');
+            $pdf->Cell($c_sub_pay, $row_h, $sub_pay, 1, 0, 'C');
+            $pdf->Cell($c_sub_tch, $row_h, $sub_tch, 1, 0, 'C');
+            $pdf->Cell($c_sub_sign,$row_h, '',        1, 0, 'C'); // 代課老師簽名格（空白）
         }
         if ($has_makeup) {
             $pdf->Cell($c_mk_date,$row_h, $mk_date, 1, 0, 'C');
@@ -303,6 +310,7 @@ if (!empty($rows)) {
             $pdf->Cell($c_sw_date,$row_h, $sw_date, 1, 0, 'C');
             $pdf->Cell($c_sw_per, $row_h, $sw_per,  1, 0, 'C');
             $pdf->Cell($c_sw_tch, $row_h, $sw_tch,  1, 0, 'C');
+            $pdf->Cell($c_sw_sign,$row_h, '',        1, 0, 'C'); // 對調教師簽名格（空白）
         }
         $pdf->Ln();
     }
