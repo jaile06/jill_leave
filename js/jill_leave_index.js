@@ -41,12 +41,12 @@ $(function () {
                     updateBadges(sn, nextStatus, res.status_text);
                     $select.remove();
                 } else {
-                    alert(res.message || '更新審核狀態失敗');
+                    swal('', res.message || '更新審核狀態失敗', 'error');
                     $btn.show();
                     $select.remove();
                 }
             }, 'json').fail(function () {
-                alert(window.jillLeaveConfig.errorMsg || '系統錯誤，無法變更狀態。');
+                swal('', window.jillLeaveConfig.errorMsg || '系統錯誤，無法變更狀態。', 'error');
                 $btn.show();
                 $select.remove();
             });

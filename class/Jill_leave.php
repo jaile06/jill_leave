@@ -394,6 +394,12 @@ class Jill_leave
 
         My97DatePicker::render();
 
+        //載入 SweetAlert 資產：本頁不需刪除確認函式，但 js/leave_form.js 的錯誤提示要用 swal()
+        //ponytail: SweetAlert::render() 只為了產生確認函式，這裡直接掛資產即可
+        global $xoTheme;
+        $xoTheme->addStylesheet('modules/tadtools/sweet-alert/sweet-alert.css');
+        $xoTheme->addScript('modules/tadtools/sweet-alert/sweet-alert.js');
+
         //加入Token安全機制
         Utility::token_form();
     }
@@ -516,7 +522,8 @@ class Jill_leave
                 AND `start_date` <= '{$end_date}'
                 AND `end_date` >= '{$start_date}'
                 AND `status` != '2'";
-            list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
+            $chk_result = $xoopsDB->query($chk_sql) or Utility::web_error($chk_sql);
+            list($dup_count) = $xoopsDB->fetchRow($chk_result);
             if ($dup_count > 0) {
                 redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
             }
@@ -563,7 +570,7 @@ class Jill_leave
 
             self::destroy_related($sn);
             $del_sql = "DELETE FROM `" . $xoopsDB->prefix("jill_leave") . "` WHERE `sn` = '{$sn}'";
-            $xoopsDB->queryF($del_sql);
+            $xoopsDB->queryF($del_sql) or Utility::web_error($del_sql);
             redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_SUBSTITUTE_SAVE_FAIL);
         }
 
@@ -634,7 +641,8 @@ class Jill_leave
                 AND `end_date` >= '{$start_date}'
                 AND `sn` != '{$self_sn}'
                 AND `status` != '2'";
-            list($dup_count) = $xoopsDB->fetchRow($xoopsDB->query($chk_sql));
+            $chk_result = $xoopsDB->query($chk_sql) or Utility::web_error($chk_sql);
+            list($dup_count) = $xoopsDB->fetchRow($chk_result);
             if ($dup_count > 0) {
                 redirect_header(XOOPS_URL . '/modules/jill_leave/index.php?sn=' . $self_sn, 3, _MD_JILLLEAVE_DUPLICATE_LEAVE);
             }

@@ -434,7 +434,7 @@
 
         if (error) {
             $box.empty();
-            alert(error);
+            swal('', error, 'error');
             return false;
         }
 
@@ -456,7 +456,7 @@
         });
         if (conflict_msg) {
             $box.empty();
-            alert(conflict_msg);
+            swal('', conflict_msg, 'error');
             return false;
         }
 
@@ -536,7 +536,7 @@
                         .replace('{period}', c.period)
                         .replace('{sn}', c.sn));
                 });
-                alert(msgs.join('\n'));
+                swal('', msgs.join('\n'), 'error');
                 callback(false);
             } else {
                 callback(true);
@@ -595,7 +595,7 @@
             return;
         }
         if (start > end) {
-            alert(cfg.msg.date_order);
+            swal('', cfg.msg.date_order, 'error');
             $('#start_date').val('');
             $('#end_date').val('');
             $container.empty();

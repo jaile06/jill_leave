@@ -188,12 +188,12 @@ $(function(){
             if (res.success) {
                 // 更新成功
             } else {
-                alert(res.message || '更新審核狀態失敗');
+                swal('', res.message || '更新審核狀態失敗', 'error');
                 // 恢復原值
                 location.reload();
             }
         }, 'json').fail(function() {
-            alert('系統錯誤，無法變更狀態。');
+            swal('', '系統錯誤，無法變更狀態。', 'error');
             location.reload();
         });
     });
