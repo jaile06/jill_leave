@@ -41,18 +41,18 @@ class Tools
                 if ($mode == 'edit') {
                     $value = $myts->htmlSpecialChars($value);
                 } else {
-                    $value = ($mode == 'write') ? $xoopsDB->escape(Wcag::amend(trim($value))) : $myts->displayTarea($value, 1, 1, 1, 1, 0);
+                    $value = ($mode == 'write') ? $xoopsDB->escape(Wcag::amend(trim((string) $value))) : $myts->displayTarea($value, 1, 1, 1, 1, 0);
                 }
             } elseif (isset($filter_arr['text']) && in_array($key, $filter_arr['text'], true)) {
                 if ($mode == 'edit') {
                     $value = $myts->htmlSpecialChars($value);
                 } else {
-                    $value = ($mode == 'write') ? $xoopsDB->escape(trim($value)) : $myts->displayTarea($value, 0, 0, 0, 1, 1);
+                    $value = ($mode == 'write') ? $xoopsDB->escape(trim((string) $value)) : $myts->displayTarea($value, 0, 0, 0, 1, 1);
                 }
             } elseif (isset($filter_arr['json']) && in_array($key, $filter_arr['json'], true)) {
 
                 if ($mode == 'write') {
-                    $value = $xoopsDB->escape(trim($value));
+                    $value = $xoopsDB->escape(trim((string) $value));
                 } else {
                     $value = json_decode($value, true);
                     foreach ($value as $k => $v) {
@@ -64,7 +64,7 @@ class Tools
                 if ($mode == 'edit') {
                     $value = $myts->htmlSpecialChars($value);
                 } else {
-                    $value = ($mode == 'write') ? $xoopsDB->escape(trim($value)) : $myts->htmlSpecialChars($value);
+                    $value = ($mode == 'write') ? $xoopsDB->escape(trim((string) $value)) : $myts->htmlSpecialChars($value);
                 }
             }
         }

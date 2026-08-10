@@ -206,7 +206,7 @@ class Jill_leave
         global $xoopsTpl;
 
         if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
         }
 
         $all = self::get($where_arr, $other_arr);
@@ -283,7 +283,7 @@ class Jill_leave
         global $xoopsDB;
 
         if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
         }
 
         $and_sql = Tools::get_and_where($where_arr);

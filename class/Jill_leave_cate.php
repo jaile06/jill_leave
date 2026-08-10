@@ -106,7 +106,7 @@ class Jill_leave_cate
         global $xoopsTpl;
 
         if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, "無查詢條件：" . __FILE__ . __LINE__);
         }
 
         $all = self::get($where_arr, $other_arr);
@@ -140,7 +140,7 @@ class Jill_leave_cate
         global $xoopsDB;
 
         if (empty($where_arr)) {
-            redirect_header($_SERVER['HTTP_REFERER'], 3, "無查詢條件：" . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, "無查詢條件：" . __FILE__ . __LINE__);
         }
 
         $and_sql = Tools::get_and_where($where_arr);

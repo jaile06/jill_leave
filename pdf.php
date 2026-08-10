@@ -19,7 +19,7 @@ if (empty($_SESSION['now_user'])) {
 
 $sn = Request::getInt('sn');
 if (empty($sn)) {
-    redirect_header($_SERVER['HTTP_REFERER'], 3, "無此假單編號");
+    redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, "無此假單編號");
     exit;
 }
 
@@ -27,7 +27,7 @@ if (empty($sn)) {
 // 若用預設 htmlSpecialChars 過的資料，含 & ' 等符號的姓名會顯示成 &amp; 字面值
 $jill_leave = Jill_leave::get(['sn' => $sn], [], '');
 if (empty($jill_leave)) {
-    redirect_header($_SERVER['HTTP_REFERER'], 3, "無此請假資料");
+    redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, "無此請假資料");
     exit;
 }
 

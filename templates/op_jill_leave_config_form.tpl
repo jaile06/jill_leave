@@ -9,7 +9,7 @@
 
             <!--管理人員 Email-->
             <div class="form-floating mb-3">
-                <input type="text" name="adm_email" id="adm_email" class="form-control" value="<{$adm_email}>" placeholder="<{$smarty.const._MI_JILLLEAVE_ADM_EMAIL}>">
+                <input type="text" name="adm_email" id="adm_email" class="form-control" value="<{$adm_email|escape:'htmlall':'UTF-8'}>" placeholder="<{$smarty.const._MI_JILLLEAVE_ADM_EMAIL}>">
                 <label for="adm_email"><{$smarty.const._MI_JILLLEAVE_ADM_EMAIL}></label>
             </div>
             <div class="form-text mb-3"><{$smarty.const._MI_JILLLEAVE_ADM_EMAIL_DESC}></div>
@@ -21,7 +21,7 @@
                 <label class="form-label fw-bold"><{$smarty.const._MI_JILLLEAVE_GRADE}></label>
                 <div class="form-text mb-2"><{$smarty.const._MI_JILLLEAVE_GRADE_DESC}></div>
                 <div class="d-flex flex-wrap gap-3" id="grade_checkboxes"></div>
-                <input type="hidden" name="grade" id="grade_hidden" value="<{$grade}>">
+                <input type="hidden" name="grade" id="grade_hidden" value="<{$grade|escape:'htmlall':'UTF-8'}>">
             </div>
 
             <hr>
@@ -39,7 +39,7 @@
             <!--節次設定-->
             <div class="form-floating mb-3">
                 <input type="text" name="class_period" id="class_period" class="form-control"
-                       value="<{$class_period}>" placeholder="<{$smarty.const._MI_JILLLEAVE_CLASS_PERIOD}>" required>
+                       value="<{$class_period|escape:'htmlall':'UTF-8'}>" placeholder="<{$smarty.const._MI_JILLLEAVE_CLASS_PERIOD}>" required>
                 <label for="class_period"><{$smarty.const._MI_JILLLEAVE_CLASS_PERIOD}></label>
             </div>
             <div class="form-text mb-3"><{$smarty.const._MI_JILLLEAVE_CLASS_PERIOD_DESC}></div>
@@ -58,7 +58,7 @@
 <script>
 (function(){
     // 動態產生 1~12 年級 checkbox，依目前設定值打勾
-    var current = '<{$grade}>'.split(',').map(function(s){ return s.trim(); });
+    var current = '<{$grade|escape:'javascript'}>'.split(',').map(function(s){ return s.trim(); });
     var container = document.getElementById('grade_checkboxes');
     for(var g = 1; g <= 12; g++){
         var checked = current.indexOf(String(g)) !== -1 ? ' checked' : '';

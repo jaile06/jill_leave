@@ -53,7 +53,7 @@ require_once __DIR__ . '/footer.php';
 //清洗以 $sep 分隔的清單字串：去句尾分隔符、拆分、$map 處理、濾空、重組
 function clean_list($value, $sep, $map = 'trim')
 {
-    $value = preg_replace('/[;,]+$/', '', trim($value));
+    $value = preg_replace('/[;,]+$/', '', trim((string) $value));
     return implode($sep, array_filter(array_map($map, explode($sep, $value))));
 }
 
