@@ -20,5 +20,8 @@ xoops_cp_header();
 $xoTheme->addStylesheet(XOOPS_URL . '/modules/tadtools/css/iconize.css');
 $xoTheme->addStylesheet(XOOPS_URL . '/modules/tadtools/css/font-awesome/css/font-awesome.css');
 $xoTheme->addStylesheet(XOOPS_URL . "/modules/tadtools/css/xoops_adm{$_SESSION['bootstrap']}.css");
-$xoTheme->addStylesheet(XOOPS_URL . '/modules/' . $xoopsModule->getVar('dirname') . '/css/module.css?t=' . time());
-$xoTheme->addStylesheet(XOOPS_URL . '/modules/' . $xoopsModule->getVar('dirname') . '/css/admin.css?t=' . time());
+//以模組版本號破快取：用 time() 會讓瀏覽器每次重抓，等於沒有快取（前台 footer.php 同一做法）
+$dirname = $xoopsModule->getVar('dirname');
+$ver     = $xoopsModule->getVar('version');
+$xoTheme->addStylesheet(XOOPS_URL . "/modules/{$dirname}/css/module.css?v={$ver}");
+$xoTheme->addStylesheet(XOOPS_URL . "/modules/{$dirname}/css/admin.css?v={$ver}");

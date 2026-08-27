@@ -131,9 +131,9 @@ class Jill_leave
         ];
         $xoopsTpl->assign('status_labels_json', json_encode($status_labels, JSON_UNESCAPED_UNICODE));
 
-        //刪除確認的JS
+        //刪除確認的JS（用固定模組網址，不用 $_SERVER['PHP_SELF']：它含 PATH_INFO 可被竄改注入 JS）
         $SweetAlert = new SweetAlert();
-        $SweetAlert->render('jill_leave_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_destroy&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
+        $SweetAlert->render('jill_leave_destroy_func', XOOPS_URL . "/modules/jill_leave/index.php?op=jill_leave_destroy&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
 
         BootstrapTable::render();
     }
@@ -206,7 +206,7 @@ class Jill_leave
         global $xoopsTpl;
 
         if (empty($where_arr)) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION);
         }
 
         $all = self::get($where_arr, $other_arr);
@@ -264,7 +264,7 @@ class Jill_leave
         $xoopsTpl->assign('csrf_token', $token);
 
         $SweetAlert = new SweetAlert();
-        $SweetAlert->render('jill_leave_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_destroy&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
+        $SweetAlert->render('jill_leave_destroy_func', XOOPS_URL . "/modules/jill_leave/index.php?op=jill_leave_destroy&XOOPS_TOKEN_REQUEST={$token}&sn=", "sn");
 
         if ($mode == "return") {
             return $all;
@@ -283,7 +283,7 @@ class Jill_leave
         global $xoopsDB;
 
         if (empty($where_arr)) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION . '：' . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/index.php', 3, _MD_JILLLEAVE_NO_CONDITION);
         }
 
         $and_sql = Tools::get_and_where($where_arr);
@@ -714,7 +714,8 @@ class Jill_leave
         //節次級衝突檢查已在 store()/update() 寫入主表前完成（見 chk_slot_conflicts），此處不再重複
 
         foreach ($substitute_dates as $i => $date) {
-            $date = $xoopsDB->escape(trim($date));
+            //(string) 轉型不可省：元素被竄改成陣列時 trim() 會丟 TypeError
+            $date = $xoopsDB->escape(trim((string) $date));
             if ($start_date !== '' && $end_date !== '' && ($date < $start_date || $date > $end_date)) {
                 continue;
             }

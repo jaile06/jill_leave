@@ -36,23 +36,23 @@ switch ($op) {
     case 'update_enable':
         //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
         if (!$GLOBALS['xoopsSecurity']->check(false)) {
-            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, _MD_JILLLEAVE_TOKEN_ERROR);
         }
         Jill_leave_cate::update_enable($cate_sn);
-        header("location: {$_SERVER['PHP_SELF']}");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/cate.php");
         exit;
 
     //新增資料
     case 'jill_leave_cate_store':
         $cate_sn = Jill_leave_cate::store();
-        header("location: {$_SERVER['PHP_SELF']}?cate_sn=$cate_sn");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/cate.php?cate_sn=$cate_sn");
         exit;
 
     //更新資料
     case 'jill_leave_cate_update':
         $where_arr['cate_sn'] = $cate_sn;
         Jill_leave_cate::update($where_arr);
-        header("location: {$_SERVER['PHP_SELF']}?cate_sn=$cate_sn");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/cate.php?cate_sn=$cate_sn");
         exit;
 
     //新增用表單
@@ -70,10 +70,10 @@ switch ($op) {
     case 'jill_leave_cate_destroy':
         //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
         if (!$GLOBALS['xoopsSecurity']->check(false)) {
-            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, _MD_JILLLEAVE_TOKEN_ERROR);
         }
         Jill_leave_cate::destroy($cate_sn);
-        header("location: {$_SERVER['PHP_SELF']}");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/cate.php");
         exit;
 
     //顯示某筆資料

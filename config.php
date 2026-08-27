@@ -36,7 +36,7 @@ switch ($op) {
 
         //管理員權限已改為每次請求重算，設定變更立即生效（見 Tools::get_session()）
 
-        header("location: {$_SERVER['PHP_SELF']}");
+        redirect_header(XOOPS_URL . '/modules/jill_leave/config.php', 2, _MD_JILLLEAVE_CONFIG_SAVED);
         exit;
 
     //預設動作：顯示設定表單

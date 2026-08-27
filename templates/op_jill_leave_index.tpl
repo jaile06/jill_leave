@@ -115,5 +115,5 @@ window.jillLeaveConfig = {
     errorMsg: '<{$smarty.const._MD_JILLLEAVE_TOKEN_ERROR|default:"系統錯誤，無法變更狀態。"}>'
 };
 </script>
-<script src="<{$xoops_url}>/modules/jill_leave/js/jill_leave_index.js"></script>
+<script src="<{$xoops_url}>/modules/jill_leave/js/jill_leave_index.js?v=<{$asset_ver|default:'1'}>"></script>
 <{/if}>

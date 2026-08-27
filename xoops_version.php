@@ -63,7 +63,6 @@ $modversion['sub'][] = [
 
 //---樣板設定---//
 $modversion['templates'] = [
-    ['file' => 'jill_leave_admin.tpl', 'description' => 'jill_leave_admin.tpl'],
     ['file' => 'jill_leave_index.tpl', 'description' => 'jill_leave_index.tpl'],
     ['file' => 'jill_leave_wrap.tpl', 'description' => 'cate/substitute/config 共用外框'],
 ];

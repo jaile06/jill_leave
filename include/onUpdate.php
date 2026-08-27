@@ -30,8 +30,11 @@ function xoops_module_update_jill_leave($module, $old_version)
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
     }
     // 舊版 enum 未含 swap 時寫入的資料被截斷，補回正確類型
-    $sql = "UPDATE `{$table}` SET `type` = 'swap' WHERE `sn` = 4 AND `type` != 'swap'";
-    $xoopsDB->queryF($sql) or Utility::web_error($sql);
+    // 僅 1.0.2 以前的版本需要補；之後的版本 enum 已含 swap，再跑會誤改正常資料
+    if ($module->versionCompare((string) $old_version, '1.0.2', '<')) {
+        $sql = "UPDATE `{$table}` SET `type` = 'swap' WHERE `sn` = 4 AND `type` != 'swap'";
+        $xoopsDB->queryF($sql) or Utility::web_error($sql);
+    }
 
     return true;
 }

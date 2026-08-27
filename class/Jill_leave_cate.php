@@ -44,9 +44,9 @@ class Jill_leave_cate
         $token = $GLOBALS['xoopsSecurity']->createToken();
         $xoopsTpl->assign('csrf_token', $token);
 
-        //刪除確認的JS
+        //刪除確認的JS（用固定模組網址，不用 $_SERVER['PHP_SELF']：它含 PATH_INFO 可被竄改注入 JS）
         $SweetAlert   = new SweetAlert();
-        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
+        $SweetAlert->render('jill_leave_cate_destroy_func', XOOPS_URL . "/modules/jill_leave/cate.php?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
         
         Utility::get_jquery(true);
         BootstrapTable::render();
@@ -106,7 +106,7 @@ class Jill_leave_cate
         global $xoopsTpl;
 
         if (empty($where_arr)) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, "無查詢條件：" . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, _MD_JILLLEAVE_NO_CONDITION);
         }
 
         $all = self::get($where_arr, $other_arr);
@@ -120,7 +120,7 @@ class Jill_leave_cate
 
         $SweetAlert   = new SweetAlert();
         $token = $GLOBALS['xoopsSecurity']->createToken();
-        $SweetAlert->render('jill_leave_cate_destroy_func', "{$_SERVER['PHP_SELF']}?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
+        $SweetAlert->render('jill_leave_cate_destroy_func', XOOPS_URL . "/modules/jill_leave/cate.php?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");
 
         if ($mode == "return") {
             return $all;
@@ -140,7 +140,7 @@ class Jill_leave_cate
         global $xoopsDB;
 
         if (empty($where_arr)) {
-            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, "無查詢條件：" . __FILE__ . __LINE__);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/cate.php', 3, _MD_JILLLEAVE_NO_CONDITION);
         }
 
         $and_sql = Tools::get_and_where($where_arr);

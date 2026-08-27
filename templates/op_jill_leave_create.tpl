@@ -384,4 +384,4 @@ var LEAVE_FORM = {
     is_swap: <{if $is_swap|default:false}>true<{else}>false<{/if}>
 };
 </script>
-<script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$smarty.now}>"></script>
+<script type="text/javascript" src="<{$xoops_url}>/modules/jill_leave/js/leave_form.js?v=<{$asset_ver|default:'1'}>"></script>

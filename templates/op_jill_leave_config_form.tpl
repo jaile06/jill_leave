@@ -55,45 +55,4 @@
 </form>
 </div>
 
-<script>
-(function(){
-    // 動態產生 1~12 年級 checkbox，依目前設定值打勾
-    var current = '<{$grade|escape:'javascript'}>'.split(',').map(function(s){ return s.trim(); });
-    var container = document.getElementById('grade_checkboxes');
-    for(var g = 1; g <= 12; g++){
-        var checked = current.indexOf(String(g)) !== -1 ? ' checked' : '';
-        container.innerHTML += '<div class="form-check">' +
-            '<input class="form-check-input grade-chk" type="checkbox" value="' + g + '" id="grade_' + g + '"' + checked + '>' +
-            '<label class="form-check-label" for="grade_' + g + '">' + g + '年級</label>' +
-            '</div>';
-    }
-
-    // 提交前處理與清洗格式
-    document.getElementById('myForm').addEventListener('submit', function(e){
-        // 1. 處理 adm_email (用分號隔開，去除句尾的分號、逗號與前後多餘空白)
-        var emailInput = document.getElementById('adm_email');
-        if (emailInput) {
-            var emailVal = emailInput.value.trim();
-            emailVal = emailVal.replace(/[;,]+$/, '').trim();
-            var emailArr = emailVal.split(';').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
-            emailInput.value = emailArr.join(';');
-        }
-
-        // 2. 處理 class_period (用逗號隔開，去除句尾的分號、逗號與前後多餘空白)
-        var periodInput = document.getElementById('class_period');
-        if (periodInput) {
-            var periodVal = periodInput.value.trim();
-            periodVal = periodVal.replace(/[;,]+$/, '').trim();
-            var periodArr = periodVal.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
-            periodInput.value = periodArr.join(',');
-        }
-
-        // 3. 處理 grade 勾選值
-        var checked = [];
-        document.querySelectorAll('.grade-chk:checked').forEach(function(el){
-            checked.push(el.value);
-        });
-        document.getElementById('grade_hidden').value = checked.join(',');
-    });
-})();
-</script>
+<script src="<{$xoops_url}>/modules/jill_leave/js/config_form.js?v=<{$asset_ver|default:'1'}>"></script>

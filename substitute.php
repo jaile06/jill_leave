@@ -11,7 +11,9 @@ require_once __DIR__ . '/header.php';
 $op = Request::getString('op');
 $sn = Request::getInt('sn');
 $substitute_sn = Request::getInt('substitute_sn');
+//月份一律驗成 yyyy-mm，之後才能安全併進導轉網址（get_overview_data 也是同一條規則）
 $month = Request::getString('month', date('Y-m'));
+$month = preg_match('/^\d{4}-\d{2}$/', $month) ? $month : date('Y-m');
 
 //僅管理者可存取代課總覽
 Tools::chk_permission();
@@ -34,20 +36,20 @@ switch ($op) {
     case 'jill_leave_destroy':
         //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
         if (!$GLOBALS['xoopsSecurity']->check(false)) {
-            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/substitute.php', 3, _MD_JILLLEAVE_TOKEN_ERROR);
         }
         Jill_leave::destroy($sn);
-        header("location: {$_SERVER['PHP_SELF']}?month=$month");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/substitute.php?month=$month");
         exit;
 
     //刪除單筆代課資料（連帶節次明細）
     case 'jill_leave_substitute_destroy':
         //CSRF 檢查（GET 連結帶 XOOPS_TOKEN_REQUEST）
         if (!$GLOBALS['xoopsSecurity']->check(false)) {
-            redirect_header($_SERVER['PHP_SELF'], 3, _MD_JILLLEAVE_TOKEN_ERROR);
+            redirect_header(XOOPS_URL . '/modules/jill_leave/substitute.php', 3, _MD_JILLLEAVE_TOKEN_ERROR);
         }
         Jill_leave_substitute::destroy($substitute_sn);
-        header("location: {$_SERVER['PHP_SELF']}?month=$month");
+        header("Location: " . XOOPS_URL . "/modules/jill_leave/substitute.php?month=$month");
         exit;
 
     //預設動作：依月份篩選全校請假/代課總覽

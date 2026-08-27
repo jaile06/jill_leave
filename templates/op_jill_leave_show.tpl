@@ -110,6 +110,7 @@
                             <{if $has_swap|default:false}>
                                 <td></td>
                             <{/if}>
+                            <td></td><{* 代課教師：無節次明細時留空，欄數要與表頭一致 *}>
                             <td><{$substitute.pay_text}></td>
                             <td><{$substitute.type_text}></td>
                         </tr>

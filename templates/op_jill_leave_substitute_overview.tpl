@@ -154,49 +154,11 @@
 </div>
 
 <script>
-$(function(){
-    // 展開/折疊課務詳細行
-    $(document).on('click', '.expand-toggle', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var sn = $btn.data('sn');
-        var $details = $('.substitute-detail[data-sn="' + sn + '"]');
-
-        $details.slideToggle(200, function() {
-            var isVisible = $details.is(':visible');
-            $btn.attr('aria-expanded', isVisible ? 'true' : 'false');
-        });
-        $btn.find('i').toggleClass('fa-plus fa-minus');
-    });
-
-    // 審核狀態下拉選單變更
-    $(document).on('change', '.update-status', function(e){
-        var $select = $(this);
-        var sn = $select.data('sn');
-        var nextStatus = parseInt($select.val());
-        
-        // 更新狀態 Select 的樣式 class
-        $select.removeClass('status-select-0 status-select-1 status-select-2')
-               .addClass('status-select-' + nextStatus);
-
-        $.post('index.php', {
-            op: 'update_status',
-            sn: sn,
-            status: nextStatus,
-            XOOPS_TOKEN_REQUEST: '<{$csrf_token}>'
-        }, function(res){
-            if (res.success) {
-                // 更新成功
-            } else {
-                swal('', res.message || '更新審核狀態失敗', 'error');
-                // 恢復原值
-                location.reload();
-            }
-        }, 'json').fail(function() {
-            swal('', '系統錯誤，無法變更狀態。', 'error');
-            location.reload();
-        });
-    });
-});
+window.jillLeaveConfig = {
+    ajaxUrl: '<{$xoops_url}>/modules/jill_leave/index.php',
+    csrfToken: '<{$csrf_token}>',
+    errorMsg: '<{$smarty.const._MD_JILLLEAVE_TOKEN_ERROR|default:"系統錯誤，無法變更狀態。"}>'
+};
 </script>
+<script src="<{$xoops_url}>/modules/jill_leave/js/substitute_overview.js?v=<{$asset_ver|default:'1'}>"></script>
 
