@@ -36,9 +36,9 @@ function xoops_module_update_jill_leave($module, $old_version)
         $xoopsDB->queryF($sql) or Utility::web_error($sql);
     }
 
-    // 1.0.3：deny_groups（禁止名單）改為 allow_groups（允許名單）
+    // 1.1.0：allow_groups（允許名單）
     // XOOPS 群組疊加，所有登入者必屬「註冊會員」，禁止名單擋不掉只有該群組的學生／他校 OpenID 帳號
-    if ($module->versionCompare((string) $old_version, '1.0.3', '<')) {
+    if ($module->versionCompare((string) $old_version, '1.1.0', '<')) {
         $table = $xoopsDB->prefix('config');
         $mid   = (int) $module->getVar('mid');
         $sql   = "DELETE FROM `{$table}` WHERE `conf_modid` = {$mid} AND `conf_name` = 'deny_groups'";
