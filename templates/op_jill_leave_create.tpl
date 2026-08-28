@@ -22,7 +22,7 @@
     /* 節次標題文字加粗與變色提示 */
     .period-text {
         font-weight: 700;
-        color: #0d6efd;
+        color: #0a3878;
         cursor: pointer;
         user-select: none;
         font-size: 1.05rem;
@@ -42,11 +42,11 @@
         <label for="leavers"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></label>
     </div>
 
-    <!--是否導師 + 導師班級（同一行）-->
-    <div class="row mb-3">
-        <div class="col-md-1 d-flex align-items-center">
+    <!--是否導師 + 導師班級（使用 fieldset 與 legend 強化無障礙語意結構）-->
+    <fieldset class="row mb-3">
+        <legend class="col-md-1 col-form-label pt-0 d-flex align-items-center">
             <{$smarty.const._MD_JILLLEAVE_IS_ADVISOR}>
-        </div>
+        </legend>
         <div class="col-md-11">
             <div class="d-flex align-items-center flex-wrap">
                 <!--導師 radio-->
@@ -56,24 +56,24 @@
                 </div>
                 <!--年級下拉-->
                 <span class="mx-2">
-                <select name="grade" id="grade" class="form-select form-select-sm d-inline-block w-auto validate[condRequired[is_advisor_1]]">
+                <select name="grade" id="grade" class="form-select form-select-sm d-inline-block w-auto validate[condRequired[is_advisor_1]]" aria-label="<{$smarty.const._MD_JILLLEAVE_GRADE_SELECT|default:'請選擇年級'}>">
                     <option value="">請選擇年級</option>
                     <{foreach from=$grade_options item=g}>
                         <option value="<{$g}>" <{if $grade == $g}>selected<{/if}>><{$g}></option>
                     <{/foreach}>
                 </select>
                 </span>
-                <span class="mx-1">年</span>
+                <span class="mx-1" aria-hidden="true">年</span>
                 <!--班級下拉-->
                 <span class="mx-2">
-                <select name="classroom" id="classroom" class="form-select form-select-sm d-inline-block w-auto validate[condRequired[is_advisor_1]]">
+                <select name="classroom" id="classroom" class="form-select form-select-sm d-inline-block w-auto validate[condRequired[is_advisor_1]]" aria-label="<{$smarty.const._MD_JILLLEAVE_CLASS_INPUT|default:'請選擇班級'}>">
                     <option value="">請選擇班級</option>
                     <{section name=j start=1 loop=$class_room_max+1}>
                         <option value="<{$smarty.section.j.index}>" <{if $classroom == $smarty.section.j.index}>selected<{/if}>><{$smarty.section.j.index}></option>
                     <{/section}>
                 </select>
                 </span>
-                <span class="mx-1">班</span>
+                <span class="mx-1" aria-hidden="true">班</span>
                 <!--科任 radio-->
                 <div class="form-check form-check-inline ms-3">
                     <input type="radio" name="is_advisor" id="is_advisor_0" class="form-check-input validate[required]" value="0" <{if $is_advisor == 0}>checked="checked"<{/if}>>
@@ -83,15 +83,15 @@
                 <input type="hidden" name="grade_class" id="grade_class" value="<{$grade_class}>">
             </div>
         </div>
-    </div>
+    </fieldset>
 
     <!--假別：補調課單固定為補調課，不需選擇假別-->
     <{if $is_swap|default:false}>
         <input type="hidden" name="swap" value="1">
         <input type="hidden" name="cate_sn" value="0">
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" value="<{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}>" disabled>
-            <label><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>
+            <input type="text" id="cate_sn_swap_display" class="form-control" value="<{$smarty.const._MD_JILLLEAVE_TYPE_SWAP}>" disabled>
+            <label for="cate_sn_swap_display"><{$smarty.const._MD_JILLLEAVE_CATE_CATE_TITLE}></label>
         </div>
     <{else}>
         <div class="form-floating mb-3">
@@ -136,10 +136,10 @@
         </div>
     </div>
 
-    <!--審核狀態（僅管理者可設定）-->
+    <!--審核狀態（僅管理者可設定，使用 fieldset 與 legend 強化無障礙群組語意）-->
     <{if $smarty.session.jill_leave_adm|default:false}>
-        <div class="mb-3">
-            <div><{$smarty.const._MD_JILLLEAVE_STATUS}></div>
+        <fieldset class="mb-3">
+            <legend class="col-form-label pt-0"><{$smarty.const._MD_JILLLEAVE_STATUS}></legend>
             <div class="form-check form-check-inline pt-2">
                 <input type="radio" name="status" id="status_0" class="form-check-input" value="0" <{if $status == 0}>checked="checked"<{/if}>>
                 <label class="form-check-label" for="status_0"><{$smarty.const._MD_JILLLEAVE_STATUS_0}></label>
@@ -152,12 +152,12 @@
                 <input type="radio" name="status" id="status_2" class="form-check-input" value="2" <{if $status == 2}>checked="checked"<{/if}>>
                 <label class="form-check-label" for="status_2"><{$smarty.const._MD_JILLLEAVE_STATUS_2}></label>
             </div>
-        </div>
+        </fieldset>
     <{/if}>
 
     <!--代課資訊：每個代課日期一張卡片（跳過週日），由 js/leave_form.js 生成-->
     <div class="mb-3">
-        <h5><i class="fa fa-users"></i> <{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_INFO}></h5>
+        <h5><i class="fa fa-users" aria-hidden="true"></i> <{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_INFO}></h5>
         <div id="substitute_container"></div>
         <!--送出時由 JS 將卡片內容序列化為 substitute_date[] 等平行陣列隱藏欄位-->
         <div id="substitute_hidden"></div>
@@ -179,7 +179,7 @@
 <template id="substitute_card_tpl">
     <div class="card mb-3 substitute-card">
         <div class="card-header d-flex flex-wrap align-items-center gap-3">
-            <strong class="me-auto"><i class="fa fa-calendar"></i> <span class="substitute-date-text"></span></strong>
+            <strong class="me-auto"><i class="fa fa-calendar" aria-hidden="true"></i> <span class="substitute-date-text"></span></strong>
             <!--調代課類型（決定支付方式是否顯示，固定放前面，避免支付方式隱藏時版面跳動）；補調課單模式下固定為補調課，此區塊由 JS 隱藏-->
             <div class="d-inline-flex align-items-center type-select-wrap">
                 <span class="text-muted small me-2"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_TYPE}></span>
@@ -207,7 +207,7 @@
             </div>
             <!--同第一天按鈕（非第一張卡片才顯示）-->
             <button type="button" class="btn btn-sm btn-outline-info copy-first-day-btn d-none" title="<{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY_TIP}>">
-                <i class="fa fa-copy"></i> <{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>
+                <i class="fa fa-copy" aria-hidden="true"></i> <{$smarty.const._MD_JILLLEAVE_COPY_FIRST_DAY}>
             </button>
         </div>
         <div class="card-body py-2">
@@ -329,7 +329,7 @@
     <!--下排：異動後課程資訊-->
     <div class="row g-2 align-items-center mt-1 pt-2 border-top changed-wrap">
         <div class="col-auto">
-            <span class="badge bg-info"><{$smarty.const._MD_JILLLEAVE_CHANGED}></span>
+            <span class="badge bg-info text-dark"><{$smarty.const._MD_JILLLEAVE_CHANGED}></span>
         </div>
         <div class="col-6 col-md-3">
             <input type="text" class="form-control form-control-sm changed-date" aria-label="<{$smarty.const._MD_JILLLEAVE_CHANGED_DATE}>" placeholder="<{$smarty.const._MD_JILLLEAVE_CHANGED_DATE}>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" disabled>

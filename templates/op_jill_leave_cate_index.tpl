@@ -16,7 +16,7 @@
 
     <div id="jill_leave_cate_save_msg"></div>
 
-    <table class="table table-sm table-striped table-hover">
+    <table class="table table-sm table-striped table-hover" aria-label="<{$smarty.const._MD_JILLLEAVE_CATE|default:'假別分類清單'}>">
         <thead>
             <tr>
             <!--假別名稱-->
@@ -50,7 +50,7 @@
             <!--啟用狀態-->
             <td class="text-center">
                 <{if $smarty.session.jill_leave_adm|default:false}>
-                    <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=update_enable&XOOPS_TOKEN_REQUEST=<{$csrf_token}>&cate_sn=<{$data.cate_sn}>" title="點擊切換啟用狀態">
+                    <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=update_enable&XOOPS_TOKEN_REQUEST=<{$csrf_token}>&cate_sn=<{$data.cate_sn}>" title="點擊切換啟用狀態" aria-label="切換 <{$data.cate_title}> 的啟用狀態，目前為 <{if $data.enable == 1}>啟用<{else}>停用<{/if}>">
                         <{if $data.enable == 1}>
                             <img src="<{$xoops_url}>/modules/jill_leave/images/icons/on.png" alt="<{$smarty.const._MD_JILLLEAVE_ENABLED}>">
                         <{else}>
@@ -68,8 +68,8 @@
 
                 <{if $smarty.session.jill_leave_adm|default:false}>
                     <td>
-                        <a href="javascript:jill_leave_cate_destroy_func(<{$data.cate_sn}>);" class="btn btn-sm btn-danger" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
-                        <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=jill_leave_cate_edit&cate_sn=<{$data.cate_sn}>" class="btn btn-sm btn-warning" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                        <a href="javascript:jill_leave_cate_destroy_func(<{$data.cate_sn}>);" class="btn btn-sm btn-danger" title="<{$smarty.const._TAD_DEL}>" aria-label="<{$smarty.const._TAD_DEL}> <{$data.cate_title}>"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                        <a href="<{$xoops_url}>/modules/jill_leave/cate.php?op=jill_leave_cate_edit&cate_sn=<{$data.cate_sn}>" class="btn btn-sm btn-warning" title="<{$smarty.const._TAD_EDIT}>" aria-label="<{$smarty.const._TAD_EDIT}> <{$data.cate_title}>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         <i class="fa fa-sort" aria-hidden="true"></i>
                     </td>
                 <{/if}>

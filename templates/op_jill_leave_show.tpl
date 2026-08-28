@@ -62,7 +62,7 @@
 <{if $substitutes|default:false}>
     <h4 class="mt-4"><i class="fa fa-users"></i> <{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_INFO}></h4>
     <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover">
+        <table class="table table-sm table-striped table-hover" aria-label="<{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_INFO|default:'代課資訊'}>">
             <thead>
                 <tr>
                     <th scope="col"><{$smarty.const._MD_JILLLEAVE_SUBSTITUTE_SUBSTITUTE_DATE}></th>

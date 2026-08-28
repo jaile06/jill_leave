@@ -2,7 +2,7 @@
     <div id="jill_leave_save_msg"></div>
 
     <div class="table-responsive">
-        <table data-toggle="table" data-pagination="true" data-search="true" data-search-highlight="true" data-mobile-responsive="true" class="table table-sm table-striped table-hover">
+        <table data-toggle="table" data-pagination="true" data-search="true" data-search-highlight="true" data-mobile-responsive="true" class="table table-sm table-striped table-hover" aria-label="<{$smarty.const._MD_JILLLEAVE_SMNAME1|default:'請假列表'}>">
         <thead>
             <tr>
             <!--請假者姓名-->
@@ -51,7 +51,7 @@
             <!--審核狀態-->
             <td class="text-center">
                 <{if $data.can_update_status|default:false}>
-                    <button type="button" class="badge border-0 bg-<{$data.status_class}> update-status" data-sn="<{$data.sn}>" data-status="<{$data.status}>" style="cursor: pointer;" title="點選可切換狀態"><{$data.status_text}></button>
+                    <button type="button" class="badge border-0 bg-<{$data.status_class}> update-status" data-sn="<{$data.sn}>" data-status="<{$data.status}>" style="cursor: pointer;" title="點選可切換狀態" aria-label="切換 <{$data.leavers}> 的審核狀態，目前為 <{$data.status_text}>"><{$data.status_text}></button>
                 <{else}>
                     <span class="badge bg-<{$data.status_class}>"><{$data.status_text}></span>
                 <{/if}>
@@ -63,13 +63,13 @@
                 <{if $smarty.session.now_user|default:false}>
                     <td>
                         <{if $data.can_delete|default:false}>
-                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}>" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash"></i></a>
+                            <a href="javascript:jill_leave_destroy_func(<{$data.sn}>);" class="btn btn-sm btn-danger" aria-label="<{$smarty.const._TAD_DEL}> <{$data.leavers}> 的請假單" title="<{$smarty.const._TAD_DEL}>"><i class="fa fa-trash" aria-hidden="true"></i></a>
                         <{/if}>
                         <{if $data.can_edit|default:false}>
-                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}>" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil"></i></a>
+                            <a href="<{$xoops_url}>/modules/jill_leave/index.php?op=jill_leave_edit&sn=<{$data.sn}>" class="btn btn-sm btn-warning" aria-label="<{$smarty.const._TAD_EDIT}> <{$data.leavers}> 的請假單" title="<{$smarty.const._TAD_EDIT}>"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         <{/if}>
                         <{if $data.can_export_pdf|default:false}>
-                            <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" aria-label="匯出 PDF" title="匯出 PDF"><i class="fa fa-file-pdf"></i></a>
+                            <a href="<{$xoops_url}>/modules/jill_leave/pdf.php?sn=<{$data.sn}>" class="btn btn-sm btn-info" aria-label="匯出 <{$data.leavers}> 的請假單 PDF" title="匯出 PDF"><i class="fa fa-file-pdf" aria-hidden="true"></i></a>
                         <{/if}>
                     </td>
                 <{/if}>

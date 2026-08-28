@@ -31,11 +31,11 @@
     </div>
 </form>
 
-<!--依單別分頁籤：日薪／鐘點代課 與 補調課-->
+<!--依單別分頁籤：日薪／鐘點代課 與 補調課（完善 WAI-ARIA 分頁籤關聯）-->
 <ul class="nav nav-tabs" role="tablist">
     <{foreach from=$leave_tabs item=tab name=tb}>
         <li class="nav-item" role="presentation">
-            <button class="nav-link <{if $smarty.foreach.tb.first}>active<{/if}>" data-bs-toggle="tab" data-bs-target="#tab-pane-<{$tab.id}>" type="button" role="tab" aria-selected="<{if $smarty.foreach.tb.first}>true<{else}>false<{/if}>">
+            <button class="nav-link <{if $smarty.foreach.tb.first}>active<{/if}>" id="tab-<{$tab.id}>" data-bs-toggle="tab" data-bs-target="#tab-pane-<{$tab.id}>" type="button" role="tab" aria-controls="tab-pane-<{$tab.id}>" aria-selected="<{if $smarty.foreach.tb.first}>true<{else}>false<{/if}>">
                 <{$tab.title}> <span class="badge bg-secondary ms-1"><{$tab.leaves|@count}></span>
             </button>
         </li>
@@ -43,10 +43,10 @@
 </ul>
 <div class="tab-content border border-top-0 p-2">
 <{foreach from=$leave_tabs item=tab name=tb}>
-<div class="tab-pane fade <{if $smarty.foreach.tb.first}>show active<{/if}>" id="tab-pane-<{$tab.id}>" role="tabpanel">
+<div class="tab-pane fade <{if $smarty.foreach.tb.first}>show active<{/if}>" id="tab-pane-<{$tab.id}>" role="tabpanel" aria-labelledby="tab-<{$tab.id}>">
 <{if $tab.leaves}>
     <div class="table-responsive">
-    <table class="table table-hover align-middle mt-2">
+    <table class="table table-hover align-middle mt-2" aria-label="<{$tab.title}>請假清單">
         <thead class="table-light border-bottom border-2">
             <tr>
                 <th scope="col" class="py-3 px-3 text-dark fw-bold" style="width: 20%;"><{$smarty.const._MD_JILLLEAVE_LEAVERS}></th>
