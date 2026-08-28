@@ -24,6 +24,6 @@ define('_MI_JILLLEAVE_CLASS_ROOM_DESC' , '如：全校最多班級數是六年�
 define('_MI_JILLLEAVE_CLASS_PERIOD' , '節次');
 define('_MI_JILLLEAVE_CLASS_PERIOD_DESC' , '早自修,第1節,第2節,第3節...用「,」逗號隔開');
 define('_MI_JILLLEAVE_CLASS_PERIOD_DEFAULT' , '早自修,第1節,第2節,第3節,第4節,第5節,第6節,第7節');
-define('_MI_JILLLEAVE_DENY_GROUPS' , '禁止使用群組');
-define('_MI_JILLLEAVE_DENY_GROUPS_DESC' , '勾選的群組將無法使用本模組（管理員不受限制）');
+define('_MI_JILLLEAVE_ALLOW_GROUPS' , '允許使用群組');
+define('_MI_JILLLEAVE_ALLOW_GROUPS_DESC' , '只有勾選群組的成員可以申請調代課（管理員不受限制）。不勾選則不限制；請勿勾選「註冊會員」，該群組包含所有登入者（含學生與他校 OpenID 帳號），等同不設限。');
 define('_MI_JILLLEAVE_CONFIG' , '系統參數');

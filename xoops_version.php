@@ -4,7 +4,7 @@ $modversion = [];
 
 //---模組基本資訊---//
 $modversion['name']        = _MI_JILLLEAVE_NAME;
-$modversion['version']     = $_SESSION['xoops_version'] >= 20511 ? '1.0.2-Stable' : '1.0.2';
+$modversion['version']     = $_SESSION['xoops_version'] >= 20511 ? '1.0.3-Stable' : '1.0.3';
 $modversion['description'] = _MI_JILLLEAVE_DESC;
 $modversion['author']      = _MI_JILLLEAVE_AUTHOR;
 $modversion['credits']     = _MI_JILLLEAVE_CREDITS;
@@ -118,10 +118,10 @@ $modversion['config'][] = [
 ];
 
 $modversion['config'][] = [
-    'name' => 'deny_groups',
-    'title' => '_MI_JILLLEAVE_DENY_GROUPS',
-    'description' => '_MI_JILLLEAVE_DENY_GROUPS_DESC',
+    'name' => 'allow_groups',
+    'title' => '_MI_JILLLEAVE_ALLOW_GROUPS',
+    'description' => '_MI_JILLLEAVE_ALLOW_GROUPS_DESC',
     'formtype' => 'group_multi',
     'valuetype' => 'array',
-    'default' => [3],
+    'default' => [],
 ];

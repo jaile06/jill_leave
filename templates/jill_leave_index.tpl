@@ -6,7 +6,7 @@
 <{/if}>
 <{if $show_student_alert|default:false}>
     <div class="alert alert-warning text-center my-3">
-        <h4><i class="fa fa-exclamation-triangle"></i> 學生帳號無權限使用此系統。</h4>
+        <h4><i class="fa fa-exclamation-triangle"></i> 您的帳號不在允許使用名單中，無權限使用此系統。</h4>
     </div>
 <{/if}>
 <{if $now_op|default:false}>

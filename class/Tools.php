@@ -204,6 +204,23 @@ class Tools
         }
     }
 
+    /**
+     * 取得本模組偏好設定值
+     *
+     * 不用 $GLOBALS['xoopsModuleConfig']：在 block 或其他模組頁面下那是別的模組的設定
+     */
+    public static function moduleConfig(string $name)
+    {
+        static $configs = null;
+        if ($configs === null) {
+            $module  = xoops_getHandler('module')->getByDirname('jill_leave');
+            $configs = is_object($module)
+                ? xoops_getHandler('config')->getConfigsByCat(0, (int) $module->getVar('mid'))
+                : [];
+        }
+        return $configs[$name] ?? null;
+    }
+
     //取得管理人員 Email 設定（讀模組偏好 adm_email）
     public static function get_admin_email($mode = '')
     {

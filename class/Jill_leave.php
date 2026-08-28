@@ -23,7 +23,10 @@ class Jill_leave
     }
 
     /**
-     * 檢查指定使用者（或當前使用者）是否屬於管理者設定的禁用群組（管理員不受限制）
+     * 檢查指定使用者（或當前使用者）是否被擋在允許名單外（管理員不受限制）
+     *
+     * 採允許名單而非禁止名單：XOOPS 群組是疊加的，所有登入者必屬「註冊會員」，
+     * 學生與他校 OpenID 帳號通常「只」屬於該群組，無自訂群組可供禁止名單比對。
      */
     public static function isDenied(?\XoopsUser $user = null): bool
     {
@@ -32,8 +35,9 @@ class Jill_leave
         if (!$user || self::isAdmin()) {
             return false;
         }
-        $denyGroups = (array) ($GLOBALS['xoopsModuleConfig']['deny_groups'] ?? [3]);
-        return (bool) array_intersect($denyGroups, $user->getGroups());
+        $allowGroups = array_filter((array) (Tools::moduleConfig('allow_groups') ?? []));
+        // ponytail: 空名單 = 不限制，避免升級後站台被全數鎖死
+        return $allowGroups && !array_intersect($allowGroups, $user->getGroups());
     }
 
     /**
