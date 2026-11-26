@@ -114,10 +114,6 @@ class Jill_leave_cate
             return false;
         }
 
-        foreach ($all as $key => $value) {
-            $all[$key] = Tools::filter($key, $value, 'read', self::$filter_arr);
-        }
-
         $SweetAlert   = new SweetAlert();
         $token = $GLOBALS['xoopsSecurity']->createToken();
         $SweetAlert->render('jill_leave_cate_destroy_func', XOOPS_URL . "/modules/jill_leave/cate.php?op=jill_leave_cate_destroy&XOOPS_TOKEN_REQUEST={$token}&cate_sn=", "cate_sn");

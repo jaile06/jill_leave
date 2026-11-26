@@ -21,7 +21,7 @@ class Tools
             return $value;
         }
 
-        if ($mode == 'write' && in_array($key, $filter_arr['json'])) {
+        if ($mode == 'write' && isset($filter_arr['json']) && is_array($filter_arr['json']) && in_array($key, $filter_arr['json'])) {
             $value = json_encode($value, 256);
         }
 
@@ -54,9 +54,11 @@ class Tools
                 if ($mode == 'write') {
                     $value = $xoopsDB->escape(trim((string) $value));
                 } else {
-                    $value = json_decode($value, true);
-                    foreach ($value as $k => $v) {
-                        $value[$k] = self::filter($k, $v, $mode);
+                    $value = json_decode((string) $value, true);
+                    if (is_array($value)) {
+                        foreach ($value as $k => $v) {
+                            $value[$k] = self::filter($k, $v, $mode, $filter_arr);
+                        }
                     }
                 }
 
@@ -195,11 +197,7 @@ class Tools
 
         if ($_SESSION['now_user']) {
             if (!isset($_SESSION['SchoolCode'])) {
-                if (isset($_REQUEST['SchoolCode']) && $_REQUEST['SchoolCode']) {
-                    $_SESSION['SchoolCode'] = Request::getString('SchoolCode');
-                } else {
-                    $_SESSION['SchoolCode'] = ($xoopsUser) ? $xoopsUser->user_intrest() : false;
-                }
+                $_SESSION['SchoolCode'] = ($xoopsUser) ? $xoopsUser->user_intrest() : false;
             }
         }
     }
@@ -259,7 +257,7 @@ class Tools
 
         if (!empty($configs)) {
             $config = $configs[0];
-            $config->setVar('conf_value', $value);
+            $config->setConfValueForInput($value);
             return $config_handler->insertConfig($config);
         }
         return false;
